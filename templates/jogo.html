@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+
+<html lang="pt-br">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Jogo de Cartas</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0c5132;
+            color: white;
+        }
+
+
+        /* ================================================= */
+        /* TOPO */
+        /* ================================================= */
+
+        .topo-geral {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: start;
+            padding: 14px 24px 6px;
+            gap: 16px;
+        }
+
+        .marca-esquerda {
+            justify-self: start;
+            text-align: left;
+        }
+
+        .marca-direita {
+            justify-self: end;
+            text-align: right;
+        }
+
+        .marca-esquerda h2,
+        .marca-direita h2 {
+            margin: 0;
+            font-size: 23px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .topo-centro {
+            text-align: center;
+        }
+
+        .topo-centro h1 {
+            margin: 0 0 4px;
+            font-size: 28px;
+        }
+
+        .topo-centro h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+
+        /* ================================================= */
+        /* LAYOUT */
+        /* ================================================= */
+
+        .layout {
+            display: grid;
+
+            grid-template-columns:
+                265px
+                minmax(450px, 1fr)
+                220px;
+
+            gap: 18px;
+
+            padding:
+                10px
+                18px
+                30px
+                8px;
+
+            max-width: 1550px;
+
+            margin: auto;
+        }
+
+
+        /* ================================================= */
+        /* PAINÉIS */
+        /* ================================================= */
+
+        .painel {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 14px;
+            padding: 16px;
+            align-self: start;
+        }
+
+        .painel h2 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 21px;
+        }
+
+
+        /* ================================================= */
+        /* PLACAR ESQUERDO */
+        /* ================================================= */
+
+        .painel-placar {
+            transform: translateX(-8px);
+
+            padding:
+                18px
+                18px
+                22px;
+
+            min-height: 360px;
+        }
+
+
+        .painel-placar h2 {
+            font-size: 24px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .cabecalho-placar {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding:
+                0
+                8px
+                11px;
+
+            border-bottom:
+                2px solid
+                rgba(255, 255, 255, 0.25);
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            opacity: 0.85;
+        }
+
+
+        .linha-placar {
+            padding:
+                16px
+                8px;
+
+            border-bottom:
+                1px solid
+                rgba(255, 255, 255, 0.15);
+        }
+
+        .linha-placar:last-child {
+            border-bottom: none;
+        }
+
+
+        .placar-principal {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+        }
+
+
+        .nome-placar {
+            font-weight: bold;
+
+            font-size: 16px;
+        }
+
+
+        .pontos-placar {
+            font-size: 24px;
+
+            font-weight: bold;
+        }
+
+
+        .asteriscos-placar {
+            margin-top: 8px;
+
+            font-size: 13px;
+
+            opacity: 0.8;
+        }
+
+
+        .sou-eu {
+            color: #ffe05c;
+        }
+
+
+        /* ================================================= */
+        /* PEDIDAS LATERAIS */
+        /* ================================================= */
+
+        .linha-status {
+            padding: 10px 5px;
+
+            border-bottom:
+                1px solid
+                rgba(255, 255, 255, 0.15);
+        }
+
+        .linha-status:last-child {
+            border-bottom: none;
+        }
+
+        .nome-status {
+            font-weight: bold;
+
+            margin-bottom: 6px;
+        }
+
+        .numeros-status {
+            display: flex;
+
+            justify-content: space-between;
+
+            font-size: 14px;
+        }
+
+        .numero-destaque {
+            font-size: 18px;
+
+            font-weight: bold;
+        }
+
+
+        /* ================================================= */
+        /* CENTRO */
+        /* ================================================= */
+
+        .centro {
+            min-width: 0;
+
+            text-align: center;
+        }
+
+
+        .area-jogo {
+            background: rgba(0, 0, 0, 0.25);
+
+            padding: 14px 20px;
+
+            border-radius: 14px;
+
+            margin-bottom: 18px;
+        }
+
+
+        .area-jogo h2,
+        .area-jogo h3 {
+            margin: 5px 0 10px;
+        }
+
+
+        .nome-destaque-vez {
+            color: #ffe05c;
+
+            font-weight: bold;
+        }
+
+
+        /* ================================================= */
+        /* TIMER */
+        /* ================================================= */
+
+        .temporizador {
+            max-width: 430px;
+
+            margin: 14px auto 2px;
+        }
+
+
+        .texto-tempo {
+            font-size: 17px;
+
+            font-weight: bold;
+
+            margin-bottom: 7px;
+        }
+
+
+        .barra-tempo {
+            width: 100%;
+
+            height: 16px;
+
+            background: rgba(255, 255, 255, 0.18);
+
+            border-radius: 20px;
+
+            overflow: hidden;
+        }
+
+
+        .barra-tempo-preenchimento {
+            height: 100%;
+
+            width: 100%;
+
+            background: #ffe05c;
+
+            border-radius: 20px;
+        }
+
+
+        .barra-tempo-preenchimento.extra {
+            background: #ff6666;
+        }
+
+
+        .texto-tempo.extra {
+            color: #ff9999;
+        }
+
+
+        /* ================================================= */
+        /* PEDIDAS */
+        /* ================================================= */
+
+        .botoes-pedido {
+            display: flex;
+
+            justify-content: center;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            margin-top: 12px;
+        }
+
+
+        .botao-pedido {
+            width: 55px;
+
+            height: 50px;
+
+            font-size: 19px;
+
+            font-weight: bold;
+
+            border: none;
+
+            border-radius: 9px;
+
+            cursor: pointer;
+        }
+
+
+        .botao-pedido:hover:not(:disabled) {
+            transform: translateY(-3px);
+        }
+
+
+        .botao-pedido:disabled {
+            opacity: 0.3;
+
+            cursor: not-allowed;
+        }
+
+
+        /* ================================================= */
+        /* CARTA VIRADA */
+        /* ================================================= */
+
+        .area-carta-virada {
+            display: flex;
+
+            justify-content: center;
+
+            margin: 15px auto 25px;
+        }
+
+
+        .bloco-carta-virada {
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+        }
+
+
+        .titulo-carta-virada {
+            font-size: 20px;
+
+            font-weight: bold;
+
+            margin-bottom: 10px;
+        }
+
+
+        .linha-carta-trunfo {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 28px;
+        }
+
+
+        .carta-virada-destaque {
+            width: 110px !important;
+
+            height: 160px !important;
+
+            font-size: 25px !important;
+        }
+
+
+        .carta-virada-destaque .simbolo-centro {
+            font-size: 54px;
+        }
+
+
+        .trunfo-destaque {
+            background: rgba(0, 0, 0, 0.32);
+
+            border: 2px solid #ffe05c;
+
+            border-radius: 12px;
+
+            padding: 15px 20px;
+
+            font-size: 19px;
+
+            white-space: nowrap;
+        }
+
+
+        .trunfo-destaque strong {
+            font-size: 23px;
+
+            color: #ffe05c;
+        }
+
+
+        /* ================================================= */
+        /* TOPO SEM TRUNFO */
+        /* ================================================= */
+
+        .topo-sem-trunfo {
+            background: rgba(0, 0, 0, 0.32);
+
+            border: 2px solid #ffe05c;
+
+            border-radius: 14px;
+
+            padding: 18px 30px;
+
+            margin: 15px auto 25px;
+
+            display: inline-block;
+        }
+
+
+        .topo-sem-trunfo h2 {
+            margin: 0 0 7px;
+
+            color: #ffe05c;
+        }
+
+
+        .topo-sem-trunfo p {
+            margin: 0;
+        }
+
+
+        /* ================================================= */
+        /* MESA */
+        /* ================================================= */
+
+        .mesa-central {
+            min-height: 280px;
+
+            padding: 10px 5px 20px;
+        }
+
+
+        .titulo-mesa {
+            margin: 5px 0 15px;
+        }
+
+
+        .cartas-mesa {
+            display: flex;
+
+            justify-content: center;
+
+            align-items: flex-start;
+
+            gap: 14px;
+
+            flex-wrap: wrap;
+
+            min-height: 160px;
+        }
+
+
+        .jogada-mesa {
+            text-align: center;
+        }
+
+
+        .nome-jogada {
+            margin-bottom: 7px;
+
+            font-weight: bold;
+        }
+
+
+        /* ================================================= */
+        /* CARTAS */
+        /* ================================================= */
+
+        .carta {
+            width: 95px;
+
+            height: 138px;
+
+            background: white;
+
+            border-radius: 10px;
+
+            color: black;
+
+            position: relative;
+
+            box-shadow:
+                0 4px 9px
+                rgba(0, 0, 0, 0.35);
+
+            font-weight: bold;
+
+            font-size: 22px;
+        }
+
+
+        button.carta {
+            border: none;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.15s,
+                opacity 0.15s;
+        }
+
+
+        button.carta:hover:not(:disabled) {
+            transform: translateY(-10px);
+        }
+
+
+        button.carta:disabled {
+            opacity: 0.30;
+
+            cursor: not-allowed;
+        }
+
+
+        .vermelha {
+            color: #c5162e;
+        }
+
+
+        .canto-superior {
+            position: absolute;
+
+            top: 7px;
+
+            left: 9px;
+
+            text-align: left;
+        }
+
+
+        .simbolo-centro {
+            position: absolute;
+
+            top: 50%;
+
+            left: 50%;
+
+            transform:
+                translate(-50%, -50%);
+
+            font-size: 45px;
+        }
+
+
+        .canto-inferior {
+            position: absolute;
+
+            bottom: 7px;
+
+            right: 9px;
+
+            transform: rotate(180deg);
+
+            text-align: left;
+        }
+
+
+        /* ================================================= */
+        /* MÃO */
+        /* ================================================= */
+
+        .area-mao {
+            border-top:
+                1px solid
+                rgba(255, 255, 255, 0.5);
+
+            padding-top: 15px;
+        }
+
+
+        .mao {
+            display: flex;
+
+            justify-content: center;
+
+            align-items: flex-end;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+
+            margin-top: 15px;
+        }
+
+
+        /* ================================================= */
+        /* RESULTADOS */
+        /* ================================================= */
+
+        .resultado {
+            background: rgba(0, 0, 0, 0.32);
+
+            padding: 18px;
+
+            border-radius: 14px;
+
+            margin-bottom: 18px;
+        }
+
+
+        .resultado p {
+            margin: 7px;
+        }
+
+
+        .ranking-final {
+            max-width: 520px;
+
+            margin: 20px auto;
+        }
+
+
+        .linha-ranking {
+            display: grid;
+
+            grid-template-columns:
+                45px
+                1fr
+                100px;
+
+            align-items: center;
+
+            gap: 10px;
+
+            padding: 12px;
+
+            border-bottom:
+                1px solid
+                rgba(255, 255, 255, 0.15);
+        }
+
+
+        .posicao-ranking {
+            font-size: 22px;
+
+            font-weight: bold;
+        }
+
+
+        .vencedor-final {
+            color: #ffe05c;
+        }
+
+
+        .erro {
+            color: #ffaaaa;
+
+            font-weight: bold;
+        }
+
+
+        /* ================================================= */
+        /* RESPONSIVO */
+        /* ================================================= */
+
+        @media (max-width: 950px) {
+
+            .topo-geral {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .marca-esquerda,
+            .marca-direita,
+            .topo-centro {
+                justify-self: center;
+                text-align: center;
+            }
+
+            .layout {
+                grid-template-columns:
+                    1fr
+                    1fr;
+
+                padding-left: 18px;
+            }
+
+
+            .centro {
+                grid-column: 1 / 3;
+
+                grid-row: 1;
+            }
+
+
+            .painel-placar {
+                grid-column: 1;
+
+                grid-row: 2;
+
+                transform: none;
+            }
+
+
+            .painel-status {
+                grid-column: 2;
+
+                grid-row: 2;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="topo-geral">
+
+    <div class="marca-esquerda">
+        <h2>Jogo Elevador Online</h2>
+    </div>
+
+    <div class="topo-centro">
+
+        <h1>
+            Sala {{ codigo }}
+        </h1>
+
+        {% if partida["fase"] != "fim_partida" %}
+
+            <h2>
+                Mão de
+                {{ partida["cartas_por_jogador"] }}
+                cartas
+            </h2>
+
+        {% else %}
+
+            <h2>
+                Partida encerrada
+            </h2>
+
+        {% endif %}
+
+    </div>
+
+    <div class="marca-direita">
+        <h2>Caio Campos</h2>
+    </div>
+
+</div>
+
+
+
+<div class="layout">
+
+
+    <!-- ================================================= -->
+    <!-- PLACAR -->
+    <!-- ================================================= -->
+
+    <aside class="painel painel-placar">
+
+        <h2>
+            Placar
+        </h2>
+
+
+        <div class="cabecalho-placar">
+
+            <span>
+                Nomes
+            </span>
+
+            <span>
+                Pontos
+            </span>
+
+        </div>
+
+
+        {% for jogador in sala["jogadores"] %}
+
+            <div class="linha-placar">
+
+                <div class="placar-principal">
+
+                    <span
+                        class="
+                            nome-placar
+
+                            {% if jogador == nome %}
+                                sou-eu
+                            {% endif %}
+                        "
+                    >
+
+                        {{ jogador }}
+
+                    </span>
+
+
+                    <span class="pontos-placar">
+
+                        {{ partida["pontos"][jogador] }}
+
+                    </span>
+
+                </div>
+
+
+                <div class="asteriscos-placar">
+
+                    Asteriscos:
+
+                    {{ partida["asteriscos"][jogador] }}
+
+                    / 3
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </aside>
+
+
+
+    <!-- ================================================= -->
+    <!-- CENTRO -->
+    <!-- ================================================= -->
+
+    <main class="centro">
+
+
+        {% if partida["fase"] == "pedidas" %}
+
+
+            <div class="area-jogo">
+
+
+                <h2>
+                    Pedidas
+                </h2>
+
+
+                {% if jogador_da_vez_pedido == nome %}
+
+
+                    <h3>
+                        Sua vez!
+                    </h3>
+
+
+                    <p>
+                        Quantas rodadas você acha que faz?
+                    </p>
+
+
+                    {% if erro_pedido %}
+
+                        <p class="erro">
+                            {{ erro_pedido }}
+                        </p>
+
+                    {% endif %}
+
+
+                    <form
+                        action="/fazer-pedido/{{ codigo }}"
+                        method="POST"
+                    >
+
+
+                        <div class="botoes-pedido">
+
+
+                            {% for numero in range(
+                                partida["cartas_por_jogador"] + 1
+                            ) %}
+
+
+                                <button
+                                    class="botao-pedido"
+
+                                    type="submit"
+
+                                    name="pedido"
+
+                                    value="{{ numero }}"
+
+                                    {% if numero == pedido_proibido %}
+                                        disabled
+                                    {% endif %}
+                                >
+
+                                    {{ numero }}
+
+                                </button>
+
+
+                            {% endfor %}
+
+
+                        </div>
+
+
+                    </form>
+
+
+                {% else %}
+
+
+                    <h3>
+
+                        Vez de
+
+                        <span class="nome-destaque-vez">
+
+                            {{ jogador_da_vez_pedido }}
+
+                        </span>
+
+                    </h3>
+
+
+                    <p>
+                        Aguardando a pedida...
+                    </p>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+
+        {% elif partida["fase"] == "jogando" %}
+
+
+            <div class="area-jogo">
+
+
+                <h2>
+
+                    Rodada
+
+                    {{ partida["numero_vaza"] }}
+
+                    /
+
+                    {{ partida["cartas_por_jogador"] }}
+
+                </h2>
+
+
+                {% if partida["naipe_puxado"] %}
+
+
+                    <p>
+
+                        Naipe puxado:
+
+                        <strong>
+
+                            {{ partida["naipe_puxado"] }}
+
+                        </strong>
+
+                    </p>
+
+
+                {% endif %}
+
+
+                {% if jogador_da_vez_jogada == nome %}
+
+
+                    <h3>
+                        Sua vez de jogar!
+                    </h3>
+
+
+                {% else %}
+
+
+                    <h3>
+
+                        Vez de
+
+                        <span class="nome-destaque-vez">
+
+                            {{ jogador_da_vez_jogada }}
+
+                        </span>
+
+                    </h3>
+
+
+                {% endif %}
+
+
+                {% if erro_jogada %}
+
+
+                    <p class="erro">
+
+                        {{ erro_jogada }}
+
+                    </p>
+
+
+                {% endif %}
+
+
+                <div class="temporizador">
+
+
+                    <div
+                        id="texto-tempo"
+                        class="texto-tempo"
+                    >
+
+                        Tempo: 15s
+
+                    </div>
+
+
+                    <div class="barra-tempo">
+
+
+                        <div
+                            id="barra-tempo"
+                            class="barra-tempo-preenchimento"
+                        ></div>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+
+        {% elif partida["fase"] == "entre_vazas" %}
+
+
+            <div class="area-jogo">
+
+
+                <h2>
+
+                    {{ partida["vencedor_ultima_vaza"] }}
+
+                    ganhou a rodada
+
+                </h2>
+
+
+                <p>
+                    Ele começa a próxima rodada.
+                </p>
+
+
+            </div>
+
+
+
+        {% elif partida["fase"] == "fim_mao" %}
+
+
+            <div class="resultado">
+
+
+                <h2>
+                    Mão encerrada!
+                </h2>
+
+
+                {% for jogador, resultado
+                    in partida["resultado_mao"].items() %}
+
+
+                    <p>
+
+
+                        <strong>
+
+                            {{ jogador }}
+
+                        </strong>
+
+
+                        —
+
+                        pediu
+
+                        {{ resultado["pedido"] }}
+
+                        |
+
+                        fez
+
+                        {{ resultado["feitas"] }}
+
+                        |
+
+                        {% if resultado["variacao"] > 0 %}
+
+
+                            +{{ resultado["variacao"] }}
+
+
+                        {% else %}
+
+
+                            {{ resultado["variacao"] }}
+
+
+                        {% endif %}
+
+
+                        pontos
+
+
+                    </p>
+
+
+                {% endfor %}
+
+
+                <p>
+
+                    <strong>
+                        Próxima mão em instantes...
+                    </strong>
+
+                </p>
+
+
+            </div>
+
+
+
+        {% elif partida["fase"] == "fim_partida" %}
+
+
+            <div class="resultado">
+
+
+                {% if
+                    partida["resultado_final"]["vencedores"]|length
+                    == 1
+                %}
+
+
+                    <h1 class="vencedor-final">
+
+                        🏆
+
+                        {{ partida["resultado_final"]["vencedores"][0] }}
+
+                        venceu!
+
+                    </h1>
+
+
+                {% else %}
+
+
+                    <h1 class="vencedor-final">
+
+                        🏆 Empate!
+
+                    </h1>
+
+
+                    <p>
+
+
+                        {% for vencedor
+                            in partida["resultado_final"]["vencedores"] %}
+
+
+                            {{ vencedor }}
+
+
+                            {% if not loop.last %}
+
+                                e
+
+                            {% endif %}
+
+
+                        {% endfor %}
+
+
+                    </p>
+
+
+                {% endif %}
+
+
+
+                <div class="ranking-final">
+
+
+                    {% for jogador
+                        in partida["resultado_final"]["ranking"] %}
+
+
+                        <div class="linha-ranking">
+
+
+                            <div class="posicao-ranking">
+
+                                {{ loop.index }}º
+
+                            </div>
+
+
+                            <div>
+
+                                {{ jogador["nome"] }}
+
+                            </div>
+
+
+                            <div>
+
+
+                                <strong>
+
+                                    {{ jogador["pontos"] }}
+
+                                </strong>
+
+                                pts
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    {% endfor %}
+
+
+                </div>
+
+
+            </div>
+
+
+        {% endif %}
+
+
+
+        <!-- ================================================= -->
+        <!-- TRUNFO -->
+        <!-- ================================================= -->
+
+        {% if partida["fase"] != "fim_partida" %}
+
+
+            {% if partida["trunfo"] is none %}
+
+
+                <div class="topo-sem-trunfo">
+
+
+                    <h2>
+                        TOPO
+                    </h2>
+
+
+                    <p>
+                        Esta mão não possui trunfo.
+                    </p>
+
+
+                </div>
+
+
+            {% else %}
+
+
+                {% set virada = partida["carta_virada"] %}
+
+
+                <div class="area-carta-virada">
+
+
+                    <div class="bloco-carta-virada">
+
+
+                        <div class="titulo-carta-virada">
+
+                            Carta virada
+
+                        </div>
+
+
+                        <div class="linha-carta-trunfo">
+
+
+                            <div
+                                class="
+                                    carta
+                                    carta-virada-destaque
+
+                                    {% if
+                                        virada["naipe"] == "Copas"
+                                        or
+                                        virada["naipe"] == "Ouros"
+                                    %}
+                                        vermelha
+                                    {% endif %}
+                                "
+                            >
+
+
+                                <div class="canto-superior">
+
+                                    {{ virada["valor"] }}
+
+                                    <br>
+
+                                    {{ virada["simbolo"] }}
+
+                                </div>
+
+
+                                <div class="simbolo-centro">
+
+                                    {{ virada["simbolo"] }}
+
+                                </div>
+
+
+                                <div class="canto-inferior">
+
+                                    {{ virada["valor"] }}
+
+                                    <br>
+
+                                    {{ virada["simbolo"] }}
+
+                                </div>
+
+
+                            </div>
+
+
+
+                            <div class="trunfo-destaque">
+
+
+                                Trunfo:
+
+
+                                <strong>
+
+                                    {{ partida["trunfo"] }}
+
+                                </strong>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+            {% endif %}
+
+
+        {% endif %}
+
+
+
+        <!-- ================================================= -->
+        <!-- MESA -->
+        <!-- ================================================= -->
+
+        {% if partida["fase"] != "fim_partida" %}
+
+
+            <section class="mesa-central">
+
+
+                <h2 class="titulo-mesa">
+                    Mesa
+                </h2>
+
+
+                <div class="cartas-mesa">
+
+
+                    {% for jogada
+                        in partida["mesa_atual"] %}
+
+
+                        {% set carta = jogada["carta"] %}
+
+
+                        <div class="jogada-mesa">
+
+
+                            <div class="nome-jogada">
+
+                                {{ jogada["jogador"] }}
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    carta
+
+                                    {% if
+                                        carta["naipe"] == "Copas"
+                                        or
+                                        carta["naipe"] == "Ouros"
+                                    %}
+                                        vermelha
+                                    {% endif %}
+                                "
+                            >
+
+
+                                <div class="canto-superior">
+
+                                    {{ carta["valor"] }}
+
+                                    <br>
+
+                                    {{ carta["simbolo"] }}
+
+                                </div>
+
+
+                                <div class="simbolo-centro">
+
+                                    {{ carta["simbolo"] }}
+
+                                </div>
+
+
+                                <div class="canto-inferior">
+
+                                    {{ carta["valor"] }}
+
+                                    <br>
+
+                                    {{ carta["simbolo"] }}
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    {% endfor %}
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- ================================================= -->
+            <!-- SUA MÃO -->
+            <!-- ================================================= -->
+
+            <section class="area-mao">
+
+
+                <h2>
+
+                    Sua mão — {{ nome }}
+
+                </h2>
+
+
+                <div class="mao">
+
+
+                    {% for carta in minha_mao %}
+
+
+                        {% set indice = loop.index0 %}
+
+
+                        <form
+                            action="/jogar-carta/{{ codigo }}"
+                            method="POST"
+                        >
+
+
+                            <input
+                                type="hidden"
+
+                                name="indice_carta"
+
+                                value="{{ indice }}"
+                            >
+
+
+                            <button
+                                type="submit"
+
+                                class="
+                                    carta
+
+                                    {% if
+                                        carta["naipe"] == "Copas"
+                                        or
+                                        carta["naipe"] == "Ouros"
+                                    %}
+                                        vermelha
+                                    {% endif %}
+                                "
+
+                                {% if
+                                    partida["fase"] != "jogando"
+                                    or
+                                    jogador_da_vez_jogada != nome
+                                    or
+                                    indice not in indices_validos
+                                %}
+
+                                    disabled
+
+                                {% endif %}
+                            >
+
+
+                                <div class="canto-superior">
+
+                                    {{ carta["valor"] }}
+
+                                    <br>
+
+                                    {{ carta["simbolo"] }}
+
+                                </div>
+
+
+                                <div class="simbolo-centro">
+
+                                    {{ carta["simbolo"] }}
+
+                                </div>
+
+
+                                <div class="canto-inferior">
+
+                                    {{ carta["valor"] }}
+
+                                    <br>
+
+                                    {{ carta["simbolo"] }}
+
+                                </div>
+
+
+                            </button>
+
+
+                        </form>
+
+
+                    {% endfor %}
+
+
+                </div>
+
+
+            </section>
+
+
+        {% endif %}
+
+
+    </main>
+
+
+
+    <!-- ================================================= -->
+    <!-- PEDIDAS / FEITAS -->
+    <!-- ================================================= -->
+
+    <aside class="painel painel-status">
+
+
+        <h2>
+            Pedidas
+        </h2>
+
+
+        {% for jogador in sala["jogadores"] %}
+
+
+            <div class="linha-status">
+
+
+                <div
+                    class="
+                        nome-status
+
+                        {% if jogador == nome %}
+                            sou-eu
+                        {% endif %}
+                    "
+                >
+
+                    {{ jogador }}
+
+                </div>
+
+
+                <div class="numeros-status">
+
+
+                    <div>
+
+                        Pedido
+
+                        <br>
+
+                        <span class="numero-destaque">
+
+
+                            {% if jogador in partida["pedidas"] %}
+
+                                {{ partida["pedidas"][jogador] }}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        Fez
+
+                        <br>
+
+                        <span class="numero-destaque">
+
+                            {{ partida["vazas"][jogador] }}
+
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        {% endfor %}
+
+
+    </aside>
+
+
+</div>
+
+
+
+<!-- ================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ================================================= -->
+
+<script>
+
+
+    const codigoSala =
+        {{ codigo | tojson }};
+
+
+    const assinaturaInicial =
+        {{ assinatura_estado | default([], true) | tojson }};
+
+
+    let recarregando = false;
+
+
+
+    async function verificarEstado() {
+
+
+        if (recarregando) {
+            return;
+        }
+
+
+        try {
+
+
+            const resposta = await fetch(
+
+                "/estado-jogo/" + codigoSala,
+
+                {
+                    cache: "no-store"
+                }
+
+            );
+
+
+            if (!resposta.ok) {
+                return;
+            }
+
+
+            const dados =
+                await resposta.json();
+
+
+            const atual =
+                JSON.stringify(
+                    dados.assinatura
+                );
+
+
+            const inicial =
+                JSON.stringify(
+                    assinaturaInicial
+                );
+
+
+            if (atual !== inicial) {
+
+
+                recarregando = true;
+
+
+                location.reload();
+
+
+            }
+
+
+        } catch (erro) {
+
+
+            console.log(
+
+                "Erro ao consultar estado:",
+
+                erro
+
+            );
+
+
+        }
+
+
+    }
+
+
+    setInterval(
+        verificarEstado,
+        500
+    );
+
+
+
+    {% if
+        partida["fase"] == "jogando"
+        and tempo_total_restante is not none
+    %}
+
+
+        const tempoInicial =
+            Number(
+                {{ tempo_total_restante | tojson }}
+            );
+
+
+        const momentoInicial =
+            performance.now();
+
+
+
+        function atualizarRelogio() {
+
+
+            const passou =
+                (
+                    performance.now()
+                    - momentoInicial
+                )
+                / 1000;
+
+
+            const restanteTotal =
+                Math.max(
+                    0,
+                    tempoInicial - passou
+                );
+
+
+            const texto =
+                document.getElementById(
+                    "texto-tempo"
+                );
+
+
+            const barra =
+                document.getElementById(
+                    "barra-tempo"
+                );
+
+
+            if (!texto || !barra) {
+                return;
+            }
+
+
+
+            if (restanteTotal > 5) {
+
+
+                const restanteNormal =
+                    restanteTotal - 5;
+
+
+                texto.innerText =
+                    "Tempo: "
+                    + Math.ceil(
+                        restanteNormal
+                    )
+                    + "s";
+
+
+                texto.classList.remove(
+                    "extra"
+                );
+
+
+                barra.classList.remove(
+                    "extra"
+                );
+
+
+                const porcentagem =
+                    (
+                        restanteNormal
+                        / 15
+                    )
+                    * 100;
+
+
+                barra.style.width =
+                    Math.max(
+                        0,
+                        Math.min(
+                            100,
+                            porcentagem
+                        )
+                    )
+                    + "%";
+
+
+            } else {
+
+
+                texto.innerText =
+                    "TEMPO EXTRA: "
+                    + Math.ceil(
+                        restanteTotal
+                    )
+                    + "s";
+
+
+                texto.classList.add(
+                    "extra"
+                );
+
+
+                barra.classList.add(
+                    "extra"
+                );
+
+
+                const porcentagem =
+                    (
+                        restanteTotal
+                        / 5
+                    )
+                    * 100;
+
+
+                barra.style.width =
+                    Math.max(
+                        0,
+                        Math.min(
+                            100,
+                            porcentagem
+                        )
+                    )
+                    + "%";
+
+
+            }
+
+
+        }
+
+
+        atualizarRelogio();
+
+
+        setInterval(
+            atualizarRelogio,
+            100
+        );
+
+
+    {% endif %}
+
+</script>
+
+
+</body>
+
+</html>

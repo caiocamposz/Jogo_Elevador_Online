@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html lang="pt-br">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Sala {{ codigo }}</title>
+
+</head>
+
+<body>
+
+    <h1>Sala {{ codigo }}</h1>
+
+    <h2 id="quantidade-jogadores"></h2>
+
+    <ul id="lista-jogadores"></ul>
+
+    <p id="status-sala">
+        Aguardando jogadores...
+    </p>
+
+
+    {% if nome == sala["anfitriao"] %}
+
+        <form
+            action="/iniciar-partida/{{ codigo }}"
+            method="POST"
+        >
+
+            <button
+                id="botao-iniciar"
+                type="submit"
+                disabled
+            >
+                Iniciar partida
+            </button>
+
+        </form>
+
+    {% else %}
+
+        <p>
+            Aguardando o dono da sala iniciar a partida.
+        </p>
+
+    {% endif %}
+
+
+    <script>
+
+        const codigo = "{{ codigo }}";
+        const meuNome = {{ nome | tojson }};
+
+
+        async function atualizarSala() {
+
+            const resposta =
+                await fetch("/estado-sala/" + codigo);
+
+            const sala =
+                await resposta.json();
+
+
+            if (sala.iniciado) {
+
+                window.location.href =
+                    "/jogo/" + codigo;
+
+                return;
+            }
+
+
+            document.getElementById(
+                "quantidade-jogadores"
+            ).innerText =
+                "Jogadores: "
+                + sala.jogadores.length
+                + " / "
+                + sala.max_jogadores;
+
+
+            const lista =
+                document.getElementById(
+                    "lista-jogadores"
+                );
+
+            lista.innerHTML = "";
+
+
+            sala.jogadores.forEach(
+                function (jogador) {
+
+                    const item =
+                        document.createElement("li");
+
+                    if (jogador === sala.anfitriao) {
+
+                        item.innerText =
+                            jogador + " (dono da sala)";
+
+                    } else {
+
+                        item.innerText = jogador;
+
+                    }
+
+                    lista.appendChild(item);
+
+                }
+            );
+
+
+            const status =
+                document.getElementById(
+                    "status-sala"
+                );
+
+
+            if (sala.completa) {
+
+                status.innerText =
+                    "Sala completa!";
+
+            } else {
+
+                status.innerText =
+                    "Aguardando jogadores...";
+
+            }
+
+
+            const botao =
+                document.getElementById(
+                    "botao-iniciar"
+                );
+
+
+            if (botao) {
+
+                botao.disabled =
+                    !sala.completa;
+
+            }
+
+        }
+
+
+        atualizarSala();
+
+        setInterval(
+            atualizarSala,
+            1000
+        );
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Jogo de Cartas</title>
+</head>
+
+<body>
+
+    <h1>Jogo de Cartas</h1>
+
+    <hr>
+
+    <h2>Criar sala</h2>
+
+    <form action="/criar-sala" method="POST">
+
+        <p>Seu nome:</p>
+
+        <input
+            type="text"
+            name="nome"
+            required
+        >
+
+        <p>Quantidade de jogadores:</p>
+
+        <select name="numero_jogadores" required>
+
+            <option value="4">4 jogadores</option>
+            <option value="5">5 jogadores</option>
+            <option value="6">6 jogadores</option>
+            <option value="7">7 jogadores</option>
+
+        </select>
+
+        <br><br>
+
+        <button type="submit">
+            Criar sala
+        </button>
+
+    </form>
+
+    <hr>
+
+    <h2>Entrar em sala</h2>
+
+    <form action="/entrar-sala" method="POST">
+
+        <p>Seu nome:</p>
+
+        <input
+            type="text"
+            name="nome"
+            required
+        >
+
+        <p>Código da sala:</p>
+
+        <input
+            type="text"
+            name="codigo"
+            maxlength="4"
+            required
+        >
+
+        <br><br>
+
+        <button type="submit">
+            Entrar na sala
+        </button>
+
+    </form>
+
+</body>
+
+</html>
