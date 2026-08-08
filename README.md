@@ -1,1 +1,4 @@
-# Jogo_Elevador_Online
+O Jogo Elevador Online nasceu de um jogo que a gente jogava nos intervalos e até durante algumas aulas na UFRJ. A ideia foi transformar esse jogo de cartas, que já fazia parte da nossa rotina , em uma versão online para continuar jogando mesmo quando cada um estivesse em um lugar diferente. O projeto foi desenvolvido por mim (Caio), com apoio do ChatGPT, principalmente na estruturação da lógica do jogo, implementação em Flask, interface, testes e organização do código. O objetivo do projeto é manter a simplicidade e a dinâmica do jogo original, mas em um formato acessível pelo navegador e fácil de compartilhar com outras pessoas.
+
+Observação: Esta é a primeira versão do Jogo Elevador Online e permite partidas apenas em uma única máquina. O suporte para partidas online entre jogadores em redes diferentes será implementado em uma versão posterior.
+
