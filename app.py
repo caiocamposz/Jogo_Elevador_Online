@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-
 import random
 import string
 import time
@@ -11,13 +10,27 @@ from baralho import Baralho
 app = Flask(__name__)
 app.secret_key = "jogo-cartas-dev-2026"
 
+
 salas = {}
 
 estado_lock = threading.RLock()
 
+
 TEMPO_NORMAL = 15
 TEMPO_EXTRA = 5
 TEMPO_TOTAL = TEMPO_NORMAL + TEMPO_EXTRA
+
+
+# =========================================================
+# ORDEM DAS CARTAS NA MÃO
+# =========================================================
+
+ORDEM_NAIPES = {
+    "Copas": 0,
+    "Ouros": 1,
+    "Espadas": 2,
+    "Paus": 3
+}
 
 
 # =========================================================
@@ -47,10 +60,29 @@ def ordem_a_partir_de(jogadores, indice_inicial):
     )
 
 
+def ordenar_mao(mao):
+
+    mao.sort(
+        key=lambda carta: (
+            ORDEM_NAIPES[carta["naipe"]],
+            carta["forca"]
+        )
+    )
+
+
+# =========================================================
+# RELÓGIO / ASTERISCOS
+# =========================================================
+
 def iniciar_relogio_turno(partida):
 
     partida["turno_iniciado_em"] = time.time()
+    partida["asterisco_turno_aplicado"] = False
 
+
+def limpar_relogio_turno(partida):
+
+    partida["turno_iniciado_em"] = None
     partida["asterisco_turno_aplicado"] = False
 
 
@@ -62,32 +94,25 @@ def calcular_tempo_restante(partida):
     ):
         return None
 
-    tempo_passado = (
+    decorrido = (
         time.time()
         - partida["turno_iniciado_em"]
     )
 
     return max(
-        0.0,
-        TEMPO_TOTAL - tempo_passado
+        0,
+        TEMPO_TOTAL - decorrido
     )
 
-
-# =========================================================
-# ASTERISCOS
-# =========================================================
 
 def adicionar_asterisco(partida, jogador):
 
     partida["asteriscos"][jogador] += 1
-
     partida["total_asteriscos"][jogador] += 1
-
 
     if partida["asteriscos"][jogador] >= 3:
 
         partida["pontos"][jogador] -= 3
-
         partida["asteriscos"][jogador] = 0
 
 
@@ -98,11 +123,9 @@ def adicionar_asterisco(partida, jogador):
 def criar_partida(sala):
 
     jogadores = sala["jogadores"]
-
     quantidade_jogadores = len(jogadores)
 
     max_cartas = 52 // quantidade_jogadores
-
 
     subida = list(
         range(
@@ -110,7 +133,6 @@ def criar_partida(sala):
             max_cartas + 1
         )
     )
-
 
     descida = list(
         range(
@@ -120,27 +142,18 @@ def criar_partida(sala):
         )
     )
 
-
     sequencia_maos = subida + descida
 
+    partida = {
+        "jogadores": list(jogadores),
 
-    # Primeiro jogador totalmente aleatório
+        "sequencia_maos": sequencia_maos,
+        "indice_mao": 0,
+        "max_cartas": max_cartas,
 
-    jogador_inicial = random.randrange(
-        quantidade_jogadores
-    )
-
-
-    sala["partida"] = {
-
-        "sequencia_maos":
-            sequencia_maos,
-
-        "indice_mao":
-            0,
-
-        "max_cartas":
-            max_cartas,
+        "jogador_inicial": random.randrange(
+            quantidade_jogadores
+        ),
 
         "pontos": {
             jogador: 0
@@ -157,63 +170,38 @@ def criar_partida(sala):
             for jogador in jogadores
         },
 
-        "resultado_final":
-            None,
+        "resultado_final": None,
 
-        "turno_iniciado_em":
-            None,
-
-        "asterisco_turno_aplicado":
-            False,
-
-        "ultima_jogada_automatica":
-            None
+        "turno_iniciado_em": None,
+        "asterisco_turno_aplicado": False
     }
 
+    sala["partida"] = partida
 
-    preparar_mao(
-        sala,
-        indice_mao=0,
-        jogador_inicial=jogador_inicial
-    )
+    preparar_mao(sala)
 
 
-# =========================================================
-# PREPARAR NOVA MÃO
-# =========================================================
-
-def preparar_mao(
-    sala,
-    indice_mao,
-    jogador_inicial
-):
+def preparar_mao(sala):
 
     partida = sala["partida"]
-
     jogadores = sala["jogadores"]
 
-
     cartas_por_jogador = (
-        partida[
-            "sequencia_maos"
-        ][indice_mao]
+        partida["sequencia_maos"][
+            partida["indice_mao"]
+        ]
     )
 
-
     baralho = Baralho()
-
     baralho.embaralhar()
-
 
     maos = {
         jogador: []
         for jogador in jogadores
     }
 
-
-    for _ in range(
-        cartas_por_jogador
-    ):
+    # Distribuição das cartas.
+    for _ in range(cartas_por_jogador):
 
         for jogador in jogadores:
 
@@ -223,201 +211,70 @@ def preparar_mao(
                 carta.to_dict()
             )
 
+    # =====================================================
+    # ORGANIZAÇÃO AUTOMÁTICA DAS MÃOS
+    # =====================================================
+    #
+    # Primeiro organiza por naipe:
+    #
+    # Copas -> Ouros -> Espadas -> Paus
+    #
+    # Depois organiza cada naipe pela força:
+    #
+    # 2 -> 3 -> ... -> 10 -> J -> Q -> K -> A
+    #
+    # A própria lista usada pelo servidor é organizada.
+    # Portanto, os índices das cartas continuam corretos
+    # quando o jogador clica nelas.
+    #
+    # =====================================================
 
-    topo = (
-        cartas_por_jogador
-        == partida["max_cartas"]
-    )
+    for jogador in jogadores:
 
+        ordenar_mao(
+            maos[jogador]
+        )
 
-    if topo:
+    # No topo não existe trunfo.
+    if cartas_por_jogador == partida["max_cartas"]:
 
         carta_virada = None
-
         trunfo = None
 
     else:
 
-        carta = baralho.comprar()
-
-        carta_virada = carta.to_dict()
-
-        trunfo = carta.naipe
-
-
-    ordem_pedidas = (
-        ordem_a_partir_de(
-            jogadores,
-            jogador_inicial
-        )
-    )
-
-
-    partida.update({
-
-        "indice_mao":
-            indice_mao,
-
-        "cartas_por_jogador":
-            cartas_por_jogador,
-
-        "maos":
-            maos,
-
-        "carta_virada":
-            carta_virada,
-
-        "trunfo":
-            trunfo,
-
-        "jogador_inicial":
-            jogador_inicial,
-
-        "jogador_inicial_nome":
-            jogadores[jogador_inicial],
-
-        "fase":
-            "pedidas",
-
-        "ordem_pedidas":
-            ordem_pedidas,
-
-        "indice_pedida_atual":
-            0,
-
-        "pedidas":
-            {},
-
-        "vazas": {
-            jogador: 0
-            for jogador in jogadores
-        },
-
-        "ordem_jogada":
-            [],
-
-        "indice_jogada_atual":
-            0,
-
-        "mesa_atual":
-            [],
-
-        "naipe_puxado":
-            None,
-
-        "numero_vaza":
-            1,
-
-        "vencedor_ultima_vaza":
-            None,
-
-        "fim_vaza_em":
-            None,
-
-        "resultado_mao":
-            None,
-
-        "fim_mao_em":
-            None,
-
-        "turno_iniciado_em":
-            None,
-
-        "asterisco_turno_aplicado":
-            False,
-
-        "ultima_jogada_automatica":
-            None
-    })
-
-
-# =========================================================
-# PEDIDAS
-# =========================================================
-
-def informacoes_pedida(partida):
-
-    if partida["fase"] != "pedidas":
-
-        return None, None
-
-
-    ordem = partida["ordem_pedidas"]
-
-    indice = partida[
-        "indice_pedida_atual"
-    ]
-
-
-    if indice >= len(ordem):
-
-        return None, None
-
-
-    jogador_da_vez = ordem[indice]
-
-    pedido_proibido = None
-
-
-    ultimo_jogador = (
-        indice == len(ordem) - 1
-    )
-
-
-    if ultimo_jogador:
-
-        soma_anteriores = sum(
-            partida[
-                "pedidas"
-            ].values()
+        carta_virada = (
+            baralho.comprar().to_dict()
         )
 
+        trunfo = carta_virada["naipe"]
 
-        possivel_proibido = (
-            partida[
-                "cartas_por_jogador"
-            ]
-            - soma_anteriores
-        )
-
-
-        if (
-            0
-            <= possivel_proibido
-            <= partida[
-                "cartas_por_jogador"
-            ]
-        ):
-
-            pedido_proibido = (
-                possivel_proibido
-            )
-
-
-    return (
-        jogador_da_vez,
-        pedido_proibido
+    partida["cartas_por_jogador"] = (
+        cartas_por_jogador
     )
 
+    partida["maos"] = maos
 
-# =========================================================
-# COMEÇAR VAZAS
-# =========================================================
+    partida["carta_virada"] = carta_virada
+    partida["trunfo"] = trunfo
 
-def iniciar_vazas(sala):
+    partida["fase"] = "pedidas"
 
-    partida = sala["partida"]
-
-    jogadores = sala["jogadores"]
-
-
-    partida["ordem_jogada"] = (
-        ordem_a_partir_de(
-            jogadores,
-            partida["jogador_inicial"]
-        )
+    partida["ordem_pedidas"] = ordem_a_partir_de(
+        jogadores,
+        partida["jogador_inicial"]
     )
 
+    partida["indice_pedida_atual"] = 0
+
+    partida["pedidas"] = {}
+
+    partida["vazas"] = {
+        jogador: 0
+        for jogador in jogadores
+    }
+
+    partida["ordem_jogada"] = []
 
     partida["indice_jogada_atual"] = 0
 
@@ -427,10 +284,92 @@ def iniciar_vazas(sala):
 
     partida["numero_vaza"] = 1
 
+    partida["vencedor_ultima_vaza"] = None
+
+    partida["momento_transicao_vaza"] = None
+
+    partida["momento_transicao_mao"] = None
+
+    partida["resultado_mao"] = {}
+
+    limpar_relogio_turno(
+        partida
+    )
+
+
+# =========================================================
+# PEDIDAS
+# =========================================================
+
+def informacoes_pedida(partida):
+
+    if partida["fase"] != "pedidas":
+        return None, None
+
+    ordem = partida["ordem_pedidas"]
+
+    indice = partida[
+        "indice_pedida_atual"
+    ]
+
+    if indice >= len(ordem):
+        return None, None
+
+    jogador_da_vez = ordem[indice]
+
+    pedido_proibido = None
+
+    ultimo_jogador = (
+        indice == len(ordem) - 1
+    )
+
+    if ultimo_jogador:
+
+        soma_anteriores = sum(
+            partida["pedidas"].values()
+        )
+
+        possivel_proibido = (
+            partida["cartas_por_jogador"]
+            - soma_anteriores
+        )
+
+        if (
+            0
+            <= possivel_proibido
+            <= partida["cartas_por_jogador"]
+        ):
+
+            pedido_proibido = (
+                possivel_proibido
+            )
+
+    return (
+        jogador_da_vez,
+        pedido_proibido
+    )
+
+
+def iniciar_vazas(partida):
+
+    jogadores = partida["jogadores"]
+
     partida["fase"] = "jogando"
 
-    partida["ultima_jogada_automatica"] = None
+    partida["ordem_jogada"] = (
+        ordem_a_partir_de(
+            jogadores,
+            partida["jogador_inicial"]
+        )
+    )
 
+    partida["indice_jogada_atual"] = 0
+
+    partida["mesa_atual"] = []
+
+    partida["naipe_puxado"] = None
+
+    partida["numero_vaza"] = 1
 
     iniciar_relogio_turno(
         partida
@@ -441,86 +380,72 @@ def iniciar_vazas(sala):
 # CARTAS VÁLIDAS
 # =========================================================
 
-def indices_cartas_validas(
-    partida,
-    jogador
-):
+def indices_cartas_validas(partida, jogador):
 
     mao = partida["maos"][jogador]
+
+    if not mao:
+        return []
+
+    # Se ninguém jogou ainda,
+    # qualquer carta é válida.
+    if not partida["mesa_atual"]:
+
+        return list(
+            range(
+                len(mao)
+            )
+        )
 
     naipe_puxado = partida[
         "naipe_puxado"
     ]
 
-
-    if naipe_puxado is None:
-
-        return list(
-            range(len(mao))
-        )
-
-
-    indices_do_naipe = [
-
+    indices_mesmo_naipe = [
         indice
 
         for indice, carta
         in enumerate(mao)
 
-        if carta["naipe"]
-        == naipe_puxado
+        if carta["naipe"] == naipe_puxado
     ]
 
+    # Se possui o naipe puxado,
+    # é obrigado a seguir.
+    if indices_mesmo_naipe:
 
-    if indices_do_naipe:
+        return indices_mesmo_naipe
 
-        return indices_do_naipe
-
-
+    # Caso contrário,
+    # qualquer carta pode ser jogada.
     return list(
-        range(len(mao))
+        range(
+            len(mao)
+        )
     )
 
 
 # =========================================================
-# VENCEDOR DA VAZA
+# VENCEDOR DA RODADA
 # =========================================================
 
-def determinar_vencedor_vaza(
-    partida
-):
+def determinar_vencedor_vaza(partida):
 
     mesa = partida["mesa_atual"]
-
-    trunfo = partida["trunfo"]
 
     naipe_puxado = partida[
         "naipe_puxado"
     ]
 
+    trunfo = partida["trunfo"]
 
-    cartas_trunfo = [
+    candidatos_trunfo = []
 
-        jogada
+    # Se existe trunfo,
+    # procura cartas do trunfo.
+    if trunfo is not None:
 
-        for jogada in mesa
-
-        if (
-            trunfo is not None
-            and
-            jogada["carta"]["naipe"]
-            == trunfo
-        )
-    ]
-
-
-    if cartas_trunfo:
-
-        candidatas = cartas_trunfo
-
-    else:
-
-        candidatas = [
+        candidatos_trunfo = [
 
             jogada
 
@@ -528,19 +453,43 @@ def determinar_vencedor_vaza(
 
             if (
                 jogada["carta"]["naipe"]
-                == naipe_puxado
+                == trunfo
             )
         ]
 
+    # Se alguém jogou trunfo,
+    # maior trunfo vence.
+    if candidatos_trunfo:
+
+        vencedora = max(
+            candidatos_trunfo,
+
+            key=lambda jogada:
+                jogada["carta"]["forca"]
+        )
+
+        return vencedora["jogador"]
+
+    # Caso contrário,
+    # maior carta do naipe puxado vence.
+    candidatos_puxado = [
+
+        jogada
+
+        for jogada in mesa
+
+        if (
+            jogada["carta"]["naipe"]
+            == naipe_puxado
+        )
+    ]
 
     vencedora = max(
-
-        candidatas,
+        candidatos_puxado,
 
         key=lambda jogada:
             jogada["carta"]["forca"]
     )
-
 
     return vencedora["jogador"]
 
@@ -552,75 +501,90 @@ def determinar_vencedor_vaza(
 def executar_jogada(
     sala,
     jogador,
-    indice_carta,
+    indice,
     automatica=False
 ):
 
     partida = sala["partida"]
 
+    if partida["fase"] != "jogando":
+
+        return (
+            False,
+            "Não é hora de jogar."
+        )
+
+    ordem = partida["ordem_jogada"]
+
+    indice_atual = partida[
+        "indice_jogada_atual"
+    ]
+
+    if indice_atual >= len(ordem):
+
+        return (
+            False,
+            "Jogada inválida."
+        )
+
+    jogador_da_vez = ordem[
+        indice_atual
+    ]
+
+    if jogador != jogador_da_vez:
+
+        return (
+            False,
+            "Não é a sua vez."
+        )
+
     mao = partida["maos"][jogador]
 
+    if (
+        indice < 0
+        or indice >= len(mao)
+    ):
 
-    carta = mao.pop(
-        indice_carta
+        return (
+            False,
+            "Carta inválida."
+        )
+
+    validos = indices_cartas_validas(
+        partida,
+        jogador
     )
 
+    if indice not in validos:
 
-    if partida[
-        "naipe_puxado"
-    ] is None:
-
-        partida[
-            "naipe_puxado"
-        ] = carta["naipe"]
-
-
-    partida[
-        "mesa_atual"
-    ].append({
-
-        "jogador":
-            jogador,
-
-        "carta":
-            carta
-    })
-
-
-    if automatica:
-
-        partida[
-            "ultima_jogada_automatica"
-        ] = {
-
-            "jogador":
-                jogador,
-
-            "carta":
-                carta
-        }
-
-    else:
-
-        partida[
-            "ultima_jogada_automatica"
-        ] = None
-
-
-    partida[
-        "indice_jogada_atual"
-    ] += 1
-
-
-    # Todos jogaram na vaza
-
-    if (
-        partida[
-            "indice_jogada_atual"
-        ]
-        >= len(
-            sala["jogadores"]
+        return (
+            False,
+            "Você deve seguir o naipe puxado."
         )
+
+    carta = mao.pop(
+        indice
+    )
+
+    # Primeira carta da rodada
+    # define o naipe puxado.
+    if not partida["mesa_atual"]:
+
+        partida["naipe_puxado"] = (
+            carta["naipe"]
+        )
+
+    partida["mesa_atual"].append(
+        {
+            "jogador": jogador,
+            "carta": carta
+        }
+    )
+
+    # Todos já jogaram.
+    if (
+        len(partida["mesa_atual"])
+        == len(partida["jogadores"])
     ):
 
         vencedor = (
@@ -629,479 +593,336 @@ def executar_jogada(
             )
         )
 
-
-        partida[
-            "vazas"
-        ][vencedor] += 1
-
+        partida["vazas"][vencedor] += 1
 
         partida[
             "vencedor_ultima_vaza"
         ] = vencedor
 
-
-        partida["fase"] = (
-            "entre_vazas"
-        )
-
-
-        partida["fim_vaza_em"] = (
-            time.time()
-        )
-
+        partida["fase"] = "entre_vazas"
 
         partida[
-            "turno_iniciado_em"
-        ] = None
+            "momento_transicao_vaza"
+        ] = time.time()
 
-
-        partida[
-            "asterisco_turno_aplicado"
-        ] = False
-
+        limpar_relogio_turno(
+            partida
+        )
 
     else:
+
+        partida[
+            "indice_jogada_atual"
+        ] += 1
 
         iniciar_relogio_turno(
             partida
         )
 
+    return True, None
+
 
 # =========================================================
-# CONTROLE DO TEMPO
+# TEMPO AUTOMÁTICO
 # =========================================================
 
 def atualizar_tempo_turno(sala):
 
     partida = sala["partida"]
 
-
     if partida["fase"] != "jogando":
-
         return
 
-
-    if (
-        partida[
-            "turno_iniciado_em"
-        ]
-        is None
-    ):
+    if partida["turno_iniciado_em"] is None:
 
         iniciar_relogio_turno(
             partida
         )
 
-
-    indice = partida[
-        "indice_jogada_atual"
-    ]
-
-
-    if indice >= len(
-        partida["ordem_jogada"]
-    ):
-
         return
 
+    agora = time.time()
 
-    jogador = (
-        partida[
-            "ordem_jogada"
-        ][indice]
+    decorrido = (
+        agora
+        - partida["turno_iniciado_em"]
     )
 
+    ordem = partida["ordem_jogada"]
 
-    tempo_passado = (
+    if (
+        partida["indice_jogada_atual"]
+        >= len(ordem)
+    ):
+        return
 
-        time.time()
-
-        - partida[
-            "turno_iniciado_em"
+    jogador_da_vez = (
+        ordem[
+            partida[
+                "indice_jogada_atual"
+            ]
         ]
     )
 
-
-    # 15 segundos:
-    # recebe 1 asterisco
-
+    # Após 15 segundos:
+    # adiciona asterisco.
     if (
-        tempo_passado >= TEMPO_NORMAL
-        and
-        not partida[
+        decorrido >= TEMPO_NORMAL
+
+        and not partida[
             "asterisco_turno_aplicado"
         ]
     ):
 
         adicionar_asterisco(
             partida,
-            jogador
+            jogador_da_vez
         )
-
 
         partida[
             "asterisco_turno_aplicado"
         ] = True
 
+    # Após 20 segundos totais:
+    # carta válida aleatória.
+    if decorrido >= TEMPO_TOTAL:
 
-    # 20 segundos:
-    # joga aleatoriamente uma carta válida
-
-    if tempo_passado >= TEMPO_TOTAL:
-
-        validas = (
+        validos = (
             indices_cartas_validas(
                 partida,
-                jogador
+                jogador_da_vez
             )
         )
 
-
-        if not validas:
-
+        if not validos:
             return
 
-
         indice_aleatorio = (
-            random.choice(validas)
+            random.choice(
+                validos
+            )
         )
 
-
         executar_jogada(
-
             sala,
-
-            jogador,
-
+            jogador_da_vez,
             indice_aleatorio,
-
             automatica=True
         )
 
 
 # =========================================================
-# PONTUAÇÃO
+# RESULTADO DA MÃO
 # =========================================================
 
-def calcular_resultado_mao(
-    partida
-):
+def calcular_resultado_mao(partida):
 
     resultado = {}
 
-
-    for jogador in partida[
-        "pedidas"
-    ]:
+    for jogador in partida["jogadores"]:
 
         pedido = partida[
             "pedidas"
         ][jogador]
 
-
         feitas = partida[
             "vazas"
         ][jogador]
 
-
+        # Acertou exatamente.
         if pedido == feitas:
 
-            variacao = (
-                5 + pedido
-            )
+            variacao = 5 + pedido
 
         else:
 
-            variacao = (
-                -abs(
-                    pedido - feitas
-                )
+            variacao = -abs(
+                pedido - feitas
             )
-
 
         partida[
             "pontos"
         ][jogador] += variacao
 
-
         resultado[jogador] = {
 
-            "pedido":
-                pedido,
+            "pedido": pedido,
 
-            "feitas":
-                feitas,
+            "feitas": feitas,
 
-            "variacao":
-                variacao,
+            "variacao": variacao,
 
-            "total":
-                partida[
-                    "pontos"
-                ][jogador]
+            "total": partida[
+                "pontos"
+            ][jogador]
         }
 
-
-    partida[
-        "resultado_mao"
-    ] = resultado
+    partida["resultado_mao"] = (
+        resultado
+    )
 
 
 # =========================================================
-# FINAL DA PARTIDA
+# RESULTADO FINAL
 # =========================================================
 
-def finalizar_partida(sala):
+def finalizar_partida(partida):
 
-    partida = sala["partida"]
+    ranking = []
 
-    jogadores = sala["jogadores"]
+    for jogador in partida["jogadores"]:
 
+        ranking.append(
+            {
+                "nome": jogador,
 
-    ranking = sorted(
+                "pontos": partida[
+                    "pontos"
+                ][jogador],
 
-        jogadores,
+                "asteriscos": partida[
+                    "total_asteriscos"
+                ][jogador]
+            }
+        )
 
+    ranking.sort(
         key=lambda jogador: (
-
-            -partida[
-                "pontos"
-            ][jogador],
-
-            partida[
-                "total_asteriscos"
-            ][jogador],
-
-            jogador.lower()
+            -jogador["pontos"],
+            jogador["asteriscos"],
+            jogador["nome"].lower()
         )
     )
 
+    melhor_pontuacao = ranking[
+        0
+    ]["pontos"]
 
-    maior_pontuacao = (
-        partida[
-            "pontos"
-        ][ranking[0]]
-    )
+    menor_asterisco_entre_lideres = min(
 
-
-    empatados_pontos = [
-
-        jogador
+        jogador["asteriscos"]
 
         for jogador in ranking
 
         if (
-            partida[
-                "pontos"
-            ][jogador]
-            == maior_pontuacao
+            jogador["pontos"]
+            == melhor_pontuacao
         )
-    ]
-
-
-    menor_asterisco = min(
-
-        partida[
-            "total_asteriscos"
-        ][jogador]
-
-        for jogador
-        in empatados_pontos
     )
-
 
     vencedores = [
 
-        jogador
+        jogador["nome"]
 
-        for jogador
-        in empatados_pontos
+        for jogador in ranking
 
         if (
-            partida[
-                "total_asteriscos"
-            ][jogador]
-            == menor_asterisco
+            jogador["pontos"]
+            == melhor_pontuacao
+
+            and jogador["asteriscos"]
+            == menor_asterisco_entre_lideres
         )
     ]
 
+    partida["resultado_final"] = {
 
-    ranking_detalhado = []
+        "ranking": ranking,
 
-
-    for jogador in ranking:
-
-        ranking_detalhado.append({
-
-            "nome":
-                jogador,
-
-            "pontos":
-                partida[
-                    "pontos"
-                ][jogador],
-
-            "asteriscos":
-                partida[
-                    "total_asteriscos"
-                ][jogador]
-        })
-
-
-    partida[
-        "resultado_final"
-    ] = {
-
-        "ranking":
-            ranking_detalhado,
-
-        "vencedores":
-            vencedores
+        "vencedores": vencedores
     }
 
+    partida["fase"] = "fim_partida"
 
-    partida["fase"] = (
-        "fim_partida"
+    limpar_relogio_turno(
+        partida
     )
 
 
 # =========================================================
-# TRANSIÇÃO ENTRE VAZAS
+# TRANSIÇÃO ENTRE RODADAS
 # =========================================================
 
-def atualizar_transicao_vaza(
-    sala
-):
+def atualizar_transicao_vaza(sala):
 
     partida = sala["partida"]
 
-
-    if (
-        partida["fase"]
-        != "entre_vazas"
-    ):
-
+    if partida["fase"] != "entre_vazas":
         return
 
+    momento = partida[
+        "momento_transicao_vaza"
+    ]
 
-    if (
-        partida[
-            "fim_vaza_em"
-        ]
-        is None
-    ):
-
+    if momento is None:
         return
 
+    if (
+        time.time() - momento
+        < 2.5
+    ):
+        return
 
-    tempo_passado = (
-
-        time.time()
-
-        - partida[
-            "fim_vaza_em"
-        ]
+    terminou_mao = (
+        partida["numero_vaza"]
+        >= partida["cartas_por_jogador"]
     )
 
-
-    if tempo_passado < 2.5:
-
-        return
-
-
-    # Última vaza da mão
-
-    if (
-        partida[
-            "numero_vaza"
-        ]
-        >=
-        partida[
-            "cartas_por_jogador"
-        ]
-    ):
+    # Última rodada da mão.
+    if terminou_mao:
 
         calcular_resultado_mao(
             partida
         )
 
-
-        partida["fase"] = (
-            "fim_mao"
-        )
-
+        partida["fase"] = "fim_mao"
 
         partida[
-            "fim_mao_em"
+            "momento_transicao_mao"
         ] = time.time()
 
+        partida["mesa_atual"] = []
+
+        partida["naipe_puxado"] = None
+
+        limpar_relogio_turno(
+            partida
+        )
 
         return
 
-
-    # Próxima vaza
-
-    partida[
-        "numero_vaza"
-    ] += 1
-
-
+    # Próxima rodada começa
+    # com o vencedor da anterior.
     vencedor = partida[
         "vencedor_ultima_vaza"
     ]
 
-
-    jogadores = sala[
-        "jogadores"
-    ]
-
-
     indice_vencedor = (
-        jogadores.index(
+        partida["jogadores"].index(
             vencedor
         )
     )
 
+    partida["numero_vaza"] += 1
 
-    partida[
-        "ordem_jogada"
-    ] = ordem_a_partir_de(
+    partida["mesa_atual"] = []
 
-        jogadores,
+    partida["naipe_puxado"] = None
 
-        indice_vencedor
+    partida["ordem_jogada"] = (
+        ordem_a_partir_de(
+            partida["jogadores"],
+            indice_vencedor
+        )
     )
 
+    partida["indice_jogada_atual"] = 0
+
+    partida["fase"] = "jogando"
 
     partida[
-        "indice_jogada_atual"
-    ] = 0
-
-
-    partida[
-        "mesa_atual"
-    ] = []
-
-
-    partida[
-        "naipe_puxado"
+        "momento_transicao_vaza"
     ] = None
-
-
-    partida[
-        "fim_vaza_em"
-    ] = None
-
-
-    partida["fase"] = (
-        "jogando"
-    )
-
-
-    partida[
-        "ultima_jogada_automatica"
-    ] = None
-
 
     iniciar_relogio_turno(
         partida
@@ -1112,104 +933,73 @@ def atualizar_transicao_vaza(
 # TRANSIÇÃO ENTRE MÃOS
 # =========================================================
 
-def atualizar_transicao_mao(
-    sala
-):
+def atualizar_transicao_mao(sala):
 
     partida = sala["partida"]
 
-
-    if (
-        partida["fase"]
-        != "fim_mao"
-    ):
-
+    if partida["fase"] != "fim_mao":
         return
 
-
-    if (
-        partida[
-            "fim_mao_em"
-        ]
-        is None
-    ):
-
-        return
-
-
-    tempo_passado = (
-
-        time.time()
-
-        - partida[
-            "fim_mao_em"
-        ]
-    )
-
-
-    if tempo_passado < 4:
-
-        return
-
-
-    proximo_indice = (
-        partida[
-            "indice_mao"
-        ]
-        + 1
-    )
-
-
-    if (
-        proximo_indice
-        >= len(
-            partida[
-                "sequencia_maos"
-            ]
-        )
-    ):
-
-        finalizar_partida(
-            sala
-        )
-
-        return
-
-
-    jogadores = sala[
-        "jogadores"
+    momento = partida[
+        "momento_transicao_mao"
     ]
 
+    if momento is None:
+        return
 
-    proximo_inicial = (
+    if (
+        time.time() - momento
+        < 4
+    ):
+        return
 
-        partida[
-            "jogador_inicial"
-        ]
-        + 1
+    ultima_mao = (
+        partida["indice_mao"]
+        >= (
+            len(
+                partida[
+                    "sequencia_maos"
+                ]
+            )
+            - 1
+        )
+    )
 
-    ) % len(jogadores)
+    if ultima_mao:
 
+        finalizar_partida(
+            partida
+        )
+
+        return
+
+    partida["indice_mao"] += 1
+
+    # Passa o jogador inicial
+    # uma posição no sentido da mesa.
+    partida["jogador_inicial"] = (
+        (
+            partida["jogador_inicial"]
+            + 1
+        )
+        % len(partida["jogadores"])
+    )
 
     preparar_mao(
-
-        sala,
-
-        indice_mao=
-            proximo_indice,
-
-        jogador_inicial=
-            proximo_inicial
+        sala
     )
 
 
 # =========================================================
-# ATUALIZAR ESTADO
+# ATUALIZAÇÃO GERAL
 # =========================================================
 
-def atualizar_estado_partida(
-    sala
-):
+def atualizar_estado_partida(sala):
+
+    partida = sala["partida"]
+
+    if partida is None:
+        return
 
     atualizar_transicao_vaza(
         sala
@@ -1226,58 +1016,39 @@ def atualizar_estado_partida(
 
 # =========================================================
 # ASSINATURA DO ESTADO
-#
-# É ISSO QUE SUBSTITUI O F5 INFINITO.
-# O NAVEGADOR SÓ RECARREGA SE ALGO REALMENTE MUDOU.
 # =========================================================
 
-def gerar_assinatura_estado(
-    sala
-):
+def gerar_assinatura_estado(sala):
 
     partida = sala["partida"]
-
     jogadores = sala["jogadores"]
-
 
     pedidos = [
 
-        partida[
-            "pedidas"
-        ].get(
+        partida["pedidas"].get(
             jogador,
             None
         )
 
-        for jogador
-        in jogadores
+        for jogador in jogadores
     ]
-
 
     vazas = [
 
-        partida[
-            "vazas"
-        ].get(
+        partida["vazas"].get(
             jogador,
             0
         )
 
-        for jogador
-        in jogadores
+        for jogador in jogadores
     ]
-
 
     pontos = [
 
-        partida[
-            "pontos"
-        ][jogador]
+        partida["pontos"][jogador]
 
-        for jogador
-        in jogadores
+        for jogador in jogadores
     ]
-
 
     asteriscos = [
 
@@ -1285,10 +1056,8 @@ def gerar_assinatura_estado(
             "asteriscos"
         ][jogador]
 
-        for jogador
-        in jogadores
+        for jogador in jogadores
     ]
-
 
     mesa = [
 
@@ -1302,7 +1071,6 @@ def gerar_assinatura_estado(
         in partida["mesa_atual"]
     ]
 
-
     tamanhos_maos = [
 
         len(
@@ -1314,10 +1082,8 @@ def gerar_assinatura_estado(
             )
         )
 
-        for jogador
-        in jogadores
+        for jogador in jogadores
     ]
-
 
     return [
 
@@ -1329,9 +1095,7 @@ def gerar_assinatura_estado(
             "cartas_por_jogador"
         ],
 
-        partida[
-            "numero_vaza"
-        ],
+        partida["numero_vaza"],
 
         partida[
             "indice_pedida_atual"
@@ -1360,7 +1124,7 @@ def gerar_assinatura_estado(
 # =========================================================
 
 @app.route("/")
-def inicio():
+def index():
 
     return render_template(
         "index.html"
@@ -1377,72 +1141,72 @@ def inicio():
 )
 def criar_sala():
 
-    nome = request.form[
-        "nome"
-    ].strip()
-
+    nome = request.form.get(
+        "nome",
+        ""
+    ).strip()
 
     try:
 
         numero_jogadores = int(
-            request.form[
-                "numero_jogadores"
-            ]
+            request.form.get(
+                "numero_jogadores",
+                0
+            )
         )
 
     except (
-        ValueError,
         TypeError,
-        KeyError
+        ValueError
     ):
 
-        return (
-            "Número de jogadores inválido."
-        )
-
+        numero_jogadores = 0
 
     if not nome:
 
-        return "Nome inválido."
-
-
-    if (
-        numero_jogadores < 4
-        or
-        numero_jogadores > 7
-    ):
-
         return (
-            "Número de jogadores inválido."
+            "Nome inválido.",
+            400
         )
 
+    if numero_jogadores not in [
+        4,
+        5,
+        6,
+        7
+    ]:
 
-    codigo = gerar_codigo()
+        return (
+            "Quantidade de jogadores inválida.",
+            400
+        )
 
+    with estado_lock:
 
-    salas[codigo] = {
+        codigo = gerar_codigo()
 
-        "max_jogadores":
-            numero_jogadores,
+        salas[codigo] = {
 
-        "jogadores":
-            [nome],
+            "max_jogadores":
+                numero_jogadores,
 
-        "anfitriao":
-            nome,
+            "jogadores": [
+                nome
+            ],
 
-        "iniciado":
-            False,
+            "anfitriao":
+                nome,
 
-        "partida":
-            None
-    }
+            "iniciado":
+                False,
 
+            "partida":
+                None
+        }
 
     session["nome"] = nome
 
     session["codigo"] = codigo
-
 
     return redirect(
         url_for(
@@ -1462,94 +1226,74 @@ def criar_sala():
 )
 def entrar_sala():
 
-    nome = request.form[
-        "nome"
-    ].strip()
+    nome = request.form.get(
+        "nome",
+        ""
+    ).strip()
 
-
-    codigo = (
-        request.form[
-            "codigo"
-        ]
-        .strip()
-        .upper()
-    )
-
+    codigo = request.form.get(
+        "codigo",
+        ""
+    ).strip().upper()
 
     if not nome:
 
-        return "Nome inválido."
-
-
-    if codigo not in salas:
-
         return (
-            "Essa sala não existe."
+            "Nome inválido.",
+            400
         )
 
+    with estado_lock:
 
-    sala_encontrada = salas[
-        codigo
-    ]
+        if codigo not in salas:
 
+            return (
+                "Sala não encontrada.",
+                404
+            )
 
-    if sala_encontrada[
-        "iniciado"
-    ]:
+        sala_atual = salas[codigo]
 
-        return (
-            "Essa partida já começou."
-        )
+        if sala_atual["iniciado"]:
 
+            return (
+                "A partida já começou.",
+                400
+            )
 
-    if (
-        len(
-            sala_encontrada[
-                "jogadores"
+        if (
+            nome
+            in sala_atual["jogadores"]
+        ):
+
+            return (
+                "Esse nome já está sendo usado na sala.",
+                400
+            )
+
+        if (
+            len(
+                sala_atual["jogadores"]
+            )
+            >= sala_atual[
+                "max_jogadores"
             ]
-        )
-        >=
-        sala_encontrada[
-            "max_jogadores"
-        ]
-    ):
+        ):
 
-        return (
-            "Essa sala já está cheia."
-        )
+            return (
+                "Sala cheia.",
+                400
+            )
 
-
-    nomes_minusculos = [
-
-        jogador.lower()
-
-        for jogador
-        in sala_encontrada[
+        sala_atual[
             "jogadores"
-        ]
-    ]
-
-
-    if (
-        nome.lower()
-        in nomes_minusculos
-    ):
-
-        return (
-            "Já existe um jogador "
-            "com esse nome."
+        ].append(
+            nome
         )
-
-
-    sala_encontrada[
-        "jogadores"
-    ].append(nome)
-
 
     session["nome"] = nome
 
     session["codigo"] = codigo
-
 
     return redirect(
         url_for(
@@ -1570,65 +1314,55 @@ def sala(codigo):
 
     codigo = codigo.upper()
 
+    with estado_lock:
 
-    if codigo not in salas:
+        if codigo not in salas:
 
-        return (
-            "Sala não encontrada."
-        )
-
-
-    nome = session.get(
-        "nome"
-    )
-
-
-    if (
-        session.get(
-            "codigo"
-        )
-        != codigo
-
-        or
-
-        nome not in salas[
-            codigo
-        ][
-            "jogadores"
-        ]
-    ):
-
-        return redirect(
-            url_for(
-                "inicio"
+            return (
+                "Sala não encontrada.",
+                404
             )
+
+        sala_atual = salas[codigo]
+
+        nome = session.get(
+            "nome"
         )
 
+        if (
+            session.get("codigo")
+            != codigo
 
-    if salas[
-        codigo
-    ][
-        "iniciado"
-    ]:
+            or nome
+            not in sala_atual[
+                "jogadores"
+            ]
+        ):
 
-        return redirect(
-            url_for(
-                "jogo",
-                codigo=codigo
+            return redirect(
+                url_for(
+                    "index"
+                )
             )
+
+        if sala_atual["iniciado"]:
+
+            return redirect(
+                url_for(
+                    "jogo",
+                    codigo=codigo
+                )
+            )
+
+        return render_template(
+            "sala.html",
+
+            codigo=codigo,
+
+            sala=sala_atual,
+
+            nome=nome
         )
-
-
-    return render_template(
-
-        "sala.html",
-
-        codigo=codigo,
-
-        sala=salas[codigo],
-
-        nome=nome
-    )
 
 
 # =========================================================
@@ -1642,54 +1376,44 @@ def estado_sala(codigo):
 
     codigo = codigo.upper()
 
+    with estado_lock:
 
-    if codigo not in salas:
+        if codigo not in salas:
+
+            return {
+                "erro":
+                    "Sala não encontrada."
+            }, 404
+
+        sala_atual = salas[codigo]
 
         return {
-            "erro":
-                "Sala não encontrada."
-        }, 404
 
+            "jogadores":
+                sala_atual["jogadores"],
 
-    sala_atual = salas[codigo]
-
-
-    return {
-
-        "codigo":
-            codigo,
-
-        "jogadores":
-            sala_atual[
-                "jogadores"
-            ],
-
-        "max_jogadores":
-            sala_atual[
-                "max_jogadores"
-            ],
-
-        "anfitriao":
-            sala_atual[
-                "anfitriao"
-            ],
-
-        "iniciado":
-            sala_atual[
-                "iniciado"
-            ],
-
-        "completa":
-            len(
+            "max_jogadores":
                 sala_atual[
-                    "jogadores"
+                    "max_jogadores"
+                ],
+
+            "anfitriao":
+                sala_atual["anfitriao"],
+
+            "iniciado":
+                sala_atual["iniciado"],
+
+            "completa": (
+                len(
+                    sala_atual[
+                        "jogadores"
+                    ]
+                )
+                == sala_atual[
+                    "max_jogadores"
                 ]
             )
-            ==
-            sala_atual[
-                "max_jogadores"
-            ]
-    }
+        }
 
 
 # =========================================================
@@ -1704,22 +1428,20 @@ def iniciar_partida(codigo):
 
     codigo = codigo.upper()
 
-
     with estado_lock:
 
         if codigo not in salas:
 
             return (
-                "Sala não encontrada."
+                "Sala não encontrada.",
+                404
             )
-
 
         sala_atual = salas[codigo]
 
         nome = session.get(
             "nome"
         )
-
 
         if (
             nome
@@ -1729,10 +1451,18 @@ def iniciar_partida(codigo):
         ):
 
             return (
-                "Somente o dono da sala "
-                "pode iniciar."
+                "Somente o dono da sala pode iniciar.",
+                403
             )
 
+        if sala_atual["iniciado"]:
+
+            return redirect(
+                url_for(
+                    "jogo",
+                    codigo=codigo
+                )
+            )
 
         if (
             len(
@@ -1740,30 +1470,21 @@ def iniciar_partida(codigo):
                     "jogadores"
                 ]
             )
-            !=
-            sala_atual[
+            != sala_atual[
                 "max_jogadores"
             ]
         ):
 
             return (
-                "A sala ainda não "
-                "está completa."
+                "A sala ainda não está completa.",
+                400
             )
 
+        sala_atual["iniciado"] = True
 
-        if not sala_atual[
-            "iniciado"
-        ]:
-
-            criar_partida(
-                sala_atual
-            )
-
-            sala_atual[
-                "iniciado"
-            ] = True
-
+        criar_partida(
+            sala_atual
+        )
 
     return redirect(
         url_for(
@@ -1774,209 +1495,7 @@ def iniciar_partida(codigo):
 
 
 # =========================================================
-# JOGO
-# =========================================================
-
-@app.route(
-    "/jogo/<codigo>"
-)
-def jogo(codigo):
-
-    codigo = codigo.upper()
-
-
-    with estado_lock:
-
-        if codigo not in salas:
-
-            return (
-                "Sala não encontrada."
-            )
-
-
-        sala_atual = salas[codigo]
-
-        nome = session.get(
-            "nome"
-        )
-
-
-        if (
-            session.get(
-                "codigo"
-            )
-            != codigo
-
-            or
-
-            nome not in sala_atual[
-                "jogadores"
-            ]
-        ):
-
-            return redirect(
-                url_for(
-                    "inicio"
-                )
-            )
-
-
-        if not sala_atual[
-            "iniciado"
-        ]:
-
-            return redirect(
-                url_for(
-                    "sala",
-                    codigo=codigo
-                )
-            )
-
-
-        atualizar_estado_partida(
-            sala_atual
-        )
-
-
-        partida = sala_atual[
-            "partida"
-        ]
-
-
-        minha_mao = (
-            partida[
-                "maos"
-            ].get(
-                nome,
-                []
-            )
-        )
-
-
-        jogador_da_vez_pedido = None
-
-        pedido_proibido = None
-
-        jogador_da_vez_jogada = None
-
-        indices_validos = []
-
-
-        if (
-            partida["fase"]
-            == "pedidas"
-        ):
-
-            (
-                jogador_da_vez_pedido,
-                pedido_proibido
-
-            ) = informacoes_pedida(
-                partida
-            )
-
-
-        if (
-            partida["fase"]
-            == "jogando"
-        ):
-
-            jogador_da_vez_jogada = (
-
-                partida[
-                    "ordem_jogada"
-                ][
-                    partida[
-                        "indice_jogada_atual"
-                    ]
-                ]
-            )
-
-
-            if (
-                jogador_da_vez_jogada
-                == nome
-            ):
-
-                indices_validos = (
-                    indices_cartas_validas(
-                        partida,
-                        nome
-                    )
-                )
-
-
-        tempo_total_restante = (
-            calcular_tempo_restante(
-                partida
-            )
-        )
-
-
-        assinatura_estado = (
-            gerar_assinatura_estado(
-                sala_atual
-            )
-        )
-
-
-        erro_pedido = session.pop(
-            "erro_pedido",
-            None
-        )
-
-
-        erro_jogada = session.pop(
-            "erro_jogada",
-            None
-        )
-
-
-        return render_template(
-
-            "jogo.html",
-
-            codigo=codigo,
-
-            nome=nome,
-
-            sala=sala_atual,
-
-            partida=partida,
-
-            minha_mao=minha_mao,
-
-            jogador_da_vez_pedido=
-                jogador_da_vez_pedido,
-
-            pedido_proibido=
-                pedido_proibido,
-
-            jogador_da_vez_jogada=
-                jogador_da_vez_jogada,
-
-            indices_validos=
-                indices_validos,
-
-            erro_pedido=
-                erro_pedido,
-
-            erro_jogada=
-                erro_jogada,
-
-            tempo_total_restante=
-                tempo_total_restante,
-
-            assinatura_estado=
-                assinatura_estado
-        )
-
-
-# =========================================================
 # ESTADO DO JOGO
-#
-# NÃO RECARREGA A PÁGINA.
-# SÓ DEVOLVE INFORMAÇÕES PARA O JAVASCRIPT.
 # =========================================================
 
 @app.route(
@@ -1985,7 +1504,6 @@ def jogo(codigo):
 def estado_jogo(codigo):
 
     codigo = codigo.upper()
-
 
     with estado_lock:
 
@@ -1996,23 +1514,18 @@ def estado_jogo(codigo):
                     "Sala não encontrada."
             }, 404
 
-
         sala_atual = salas[codigo]
 
         nome = session.get(
             "nome"
         )
 
-
         if (
-            session.get(
-                "codigo"
-            )
+            session.get("codigo")
             != codigo
 
-            or
-
-            nome not in sala_atual[
+            or nome
+            not in sala_atual[
                 "jogadores"
             ]
         ):
@@ -2021,7 +1534,6 @@ def estado_jogo(codigo):
                 "erro":
                     "Jogador inválido."
             }, 403
-
 
         if not sala_atual[
             "iniciado"
@@ -2032,16 +1544,13 @@ def estado_jogo(codigo):
                     "Partida não iniciada."
             }, 400
 
-
         atualizar_estado_partida(
             sala_atual
         )
 
-
         partida = sala_atual[
             "partida"
         ]
-
 
         return {
 
@@ -2058,6 +1567,197 @@ def estado_jogo(codigo):
 
 
 # =========================================================
+# JOGO
+# =========================================================
+
+@app.route(
+    "/jogo/<codigo>"
+)
+def jogo(codigo):
+
+    codigo = codigo.upper()
+
+    with estado_lock:
+
+        if codigo not in salas:
+
+            return (
+                "Sala não encontrada.",
+                404
+            )
+
+        sala_atual = salas[codigo]
+
+        nome = session.get(
+            "nome"
+        )
+
+        if (
+            session.get("codigo")
+            != codigo
+
+            or nome
+            not in sala_atual[
+                "jogadores"
+            ]
+        ):
+
+            return redirect(
+                url_for(
+                    "index"
+                )
+            )
+
+        if not sala_atual[
+            "iniciado"
+        ]:
+
+            return redirect(
+                url_for(
+                    "sala",
+                    codigo=codigo
+                )
+            )
+
+        atualizar_estado_partida(
+            sala_atual
+        )
+
+        partida = sala_atual[
+            "partida"
+        ]
+
+        minha_mao = (
+            partida[
+                "maos"
+            ].get(
+                nome,
+                []
+            )
+        )
+
+        jogador_da_vez_pedido = None
+
+        pedido_proibido = None
+
+        jogador_da_vez_jogada = None
+
+        indices_validos = []
+
+        erro_pedido = session.pop(
+            "erro_pedido",
+            None
+        )
+
+        erro_jogada = session.pop(
+            "erro_jogada",
+            None
+        )
+
+        if (
+            partida["fase"]
+            == "pedidas"
+        ):
+
+            (
+                jogador_da_vez_pedido,
+                pedido_proibido
+            ) = informacoes_pedida(
+                partida
+            )
+
+        elif (
+            partida["fase"]
+            == "jogando"
+        ):
+
+            ordem = partida[
+                "ordem_jogada"
+            ]
+
+            if (
+                partida[
+                    "indice_jogada_atual"
+                ]
+                < len(ordem)
+            ):
+
+                jogador_da_vez_jogada = (
+                    ordem[
+                        partida[
+                            "indice_jogada_atual"
+                        ]
+                    ]
+                )
+
+            if (
+                jogador_da_vez_jogada
+                == nome
+            ):
+
+                indices_validos = (
+                    indices_cartas_validas(
+                        partida,
+                        nome
+                    )
+                )
+
+        tempo_total_restante = (
+            calcular_tempo_restante(
+                partida
+            )
+        )
+
+        assinatura_estado = (
+            gerar_assinatura_estado(
+                sala_atual
+            )
+        )
+
+        return render_template(
+            "jogo.html",
+
+            codigo=codigo,
+
+            sala=sala_atual,
+
+            nome=nome,
+
+            partida=partida,
+
+            minha_mao=minha_mao,
+
+            jogador_da_vez_pedido=(
+                jogador_da_vez_pedido
+            ),
+
+            pedido_proibido=(
+                pedido_proibido
+            ),
+
+            jogador_da_vez_jogada=(
+                jogador_da_vez_jogada
+            ),
+
+            indices_validos=(
+                indices_validos
+            ),
+
+            erro_pedido=erro_pedido,
+
+            erro_jogada=erro_jogada,
+
+            tempo_total_restante=(
+                tempo_total_restante
+            ),
+
+            assinatura_estado=(
+                assinatura_estado
+            )
+        )
+
+
+# =========================================================
 # FAZER PEDIDO
 # =========================================================
 
@@ -2069,26 +1769,44 @@ def fazer_pedido(codigo):
 
     codigo = codigo.upper()
 
-
     with estado_lock:
 
         if codigo not in salas:
 
             return (
-                "Sala não encontrada."
+                "Sala não encontrada.",
+                404
             )
 
-
         sala_atual = salas[codigo]
-
-        partida = sala_atual[
-            "partida"
-        ]
 
         nome = session.get(
             "nome"
         )
 
+        if (
+            session.get("codigo")
+            != codigo
+
+            or nome
+            not in sala_atual[
+                "jogadores"
+            ]
+        ):
+
+            return redirect(
+                url_for(
+                    "index"
+                )
+            )
+
+        partida = sala_atual[
+            "partida"
+        ]
+
+        atualizar_estado_partida(
+            sala_atual
+        )
 
         if (
             partida["fase"]
@@ -2102,27 +1820,20 @@ def fazer_pedido(codigo):
                 )
             )
 
-
         (
             jogador_da_vez,
             pedido_proibido
-
         ) = informacoes_pedida(
             partida
         )
 
-
-        if (
-            nome
-            != jogador_da_vez
-        ):
+        if jogador_da_vez != nome:
 
             session[
                 "erro_pedido"
             ] = (
-                "Ainda não é sua vez."
+                "Não é a sua vez de pedir."
             )
-
 
             return redirect(
                 url_for(
@@ -2130,20 +1841,18 @@ def fazer_pedido(codigo):
                     codigo=codigo
                 )
             )
-
 
         try:
 
             pedido = int(
-                request.form[
+                request.form.get(
                     "pedido"
-                ]
+                )
             )
 
         except (
-            ValueError,
             TypeError,
-            KeyError
+            ValueError
         ):
 
             session[
@@ -2152,7 +1861,6 @@ def fazer_pedido(codigo):
                 "Pedido inválido."
             )
 
-
             return redirect(
                 url_for(
                     "jogo",
@@ -2160,16 +1868,12 @@ def fazer_pedido(codigo):
                 )
             )
 
-
-        maximo = partida[
-            "cartas_por_jogador"
-        ]
-
-
-        if (
-            pedido < 0
-            or
-            pedido > maximo
+        if not (
+            0
+            <= pedido
+            <= partida[
+                "cartas_por_jogador"
+            ]
         ):
 
             session[
@@ -2178,32 +1882,27 @@ def fazer_pedido(codigo):
                 "Pedido inválido."
             )
 
-
             return redirect(
                 url_for(
                     "jogo",
                     codigo=codigo
                 )
             )
-
 
         if (
             pedido_proibido
             is not None
 
-            and
-
-            pedido
+            and pedido
             == pedido_proibido
         ):
 
             session[
                 "erro_pedido"
             ] = (
-                f"Você não pode pedir "
-                f"{pedido}."
+                "Esse pedido faria a soma "
+                "ser igual ao número de rodadas."
             )
-
 
             return redirect(
                 url_for(
@@ -2212,33 +1911,35 @@ def fazer_pedido(codigo):
                 )
             )
 
-
         partida[
             "pedidas"
         ][nome] = pedido
 
-
-        partida[
-            "indice_pedida_atual"
-        ] += 1
-
-
-        if (
+        terminou_pedidas = (
             partida[
                 "indice_pedida_atual"
             ]
-            >=
-            len(
-                partida[
-                    "ordem_pedidas"
-                ]
+            >= (
+                len(
+                    partida[
+                        "ordem_pedidas"
+                    ]
+                )
+                - 1
             )
-        ):
+        )
+
+        if terminou_pedidas:
 
             iniciar_vazas(
-                sala_atual
+                partida
             )
 
+        else:
+
+            partida[
+                "indice_pedida_atual"
+            ] += 1
 
     return redirect(
         url_for(
@@ -2260,91 +1961,52 @@ def jogar_carta(codigo):
 
     codigo = codigo.upper()
 
-
     with estado_lock:
 
         if codigo not in salas:
 
             return (
-                "Sala não encontrada."
+                "Sala não encontrada.",
+                404
             )
 
-
         sala_atual = salas[codigo]
-
-
-        atualizar_estado_partida(
-            sala_atual
-        )
-
-
-        partida = sala_atual[
-            "partida"
-        ]
-
 
         nome = session.get(
             "nome"
         )
 
-
         if (
-            partida["fase"]
-            != "jogando"
-        ):
+            session.get("codigo")
+            != codigo
 
-            return redirect(
-                url_for(
-                    "jogo",
-                    codigo=codigo
-                )
-            )
-
-
-        jogador_da_vez = (
-
-            partida[
-                "ordem_jogada"
-            ][
-                partida[
-                    "indice_jogada_atual"
-                ]
+            or nome
+            not in sala_atual[
+                "jogadores"
             ]
-        )
-
-
-        if (
-            nome
-            != jogador_da_vez
         ):
-
-            session[
-                "erro_jogada"
-            ] = (
-                "Ainda não é sua vez."
-            )
-
 
             return redirect(
                 url_for(
-                    "jogo",
-                    codigo=codigo
+                    "index"
                 )
             )
 
+        atualizar_estado_partida(
+            sala_atual
+        )
 
         try:
 
-            indice_carta = int(
-                request.form[
+            indice = int(
+                request.form.get(
                     "indice_carta"
-                ]
+                )
             )
 
         except (
-            ValueError,
             TypeError,
-            KeyError
+            ValueError
         ):
 
             session[
@@ -2353,7 +2015,6 @@ def jogar_carta(codigo):
                 "Carta inválida."
             )
 
-
             return redirect(
                 url_for(
                     "jogo",
@@ -2361,76 +2022,19 @@ def jogar_carta(codigo):
                 )
             )
 
-
-        mao = partida[
-            "maos"
-        ][nome]
-
-
-        if (
-            indice_carta < 0
-
-            or
-
-            indice_carta
-            >= len(mao)
-        ):
-
-            session[
-                "erro_jogada"
-            ] = (
-                "Carta inválida."
-            )
-
-
-            return redirect(
-                url_for(
-                    "jogo",
-                    codigo=codigo
-                )
-            )
-
-
-        validas = (
-            indices_cartas_validas(
-                partida,
-                nome
+        sucesso, erro = (
+            executar_jogada(
+                sala_atual,
+                nome,
+                indice
             )
         )
 
-
-        if (
-            indice_carta
-            not in validas
-        ):
+        if not sucesso:
 
             session[
                 "erro_jogada"
-            ] = (
-                "Você é obrigado a seguir "
-                "o naipe puxado."
-            )
-
-
-            return redirect(
-                url_for(
-                    "jogo",
-                    codigo=codigo
-                )
-            )
-
-
-        executar_jogada(
-
-            sala_atual,
-
-            nome,
-
-            indice_carta,
-
-            automatica=False
-        )
-
+            ] = erro
 
     return redirect(
         url_for(
@@ -2441,12 +2045,12 @@ def jogar_carta(codigo):
 
 
 # =========================================================
-# EXECUTAR
+# EXECUÇÃO
 # =========================================================
 
 if __name__ == "__main__":
 
     app.run(
-        debug=True,
+        debug=False,
         threaded=True
     )
