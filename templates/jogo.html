@@ -6,7 +6,7 @@
 
     <meta charset="UTF-8">
 
-    <title>Jogo de Cartas</title>
+    <title>Jogo Elevador Online</title>
 
     <style>
 
@@ -127,19 +127,14 @@
             min-height: 360px;
         }
 
-
         .painel-placar h2 {
             font-size: 24px;
-
             margin-bottom: 20px;
         }
 
-
         .cabecalho-placar {
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
 
             padding:
@@ -152,12 +147,9 @@
                 rgba(255, 255, 255, 0.25);
 
             font-size: 14px;
-
             font-weight: bold;
-
             opacity: 0.85;
         }
-
 
         .linha-placar {
             padding:
@@ -173,38 +165,27 @@
             border-bottom: none;
         }
 
-
         .placar-principal {
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
         }
 
-
         .nome-placar {
             font-weight: bold;
-
             font-size: 16px;
         }
 
-
         .pontos-placar {
             font-size: 24px;
-
             font-weight: bold;
         }
 
-
         .asteriscos-placar {
             margin-top: 8px;
-
             font-size: 13px;
-
             opacity: 0.8;
         }
-
 
         .sou-eu {
             color: #ffe05c;
@@ -229,21 +210,17 @@
 
         .nome-status {
             font-weight: bold;
-
             margin-bottom: 6px;
         }
 
         .numeros-status {
             display: flex;
-
             justify-content: space-between;
-
             font-size: 14px;
         }
 
         .numero-destaque {
             font-size: 18px;
-
             font-weight: bold;
         }
 
@@ -254,10 +231,8 @@
 
         .centro {
             min-width: 0;
-
             text-align: center;
         }
-
 
         .area-jogo {
             background: rgba(0, 0, 0, 0.25);
@@ -269,16 +244,13 @@
             margin-bottom: 18px;
         }
 
-
         .area-jogo h2,
         .area-jogo h3 {
             margin: 5px 0 10px;
         }
 
-
         .nome-destaque-vez {
             color: #ffe05c;
-
             font-weight: bold;
         }
 
@@ -289,23 +261,17 @@
 
         .temporizador {
             max-width: 430px;
-
             margin: 14px auto 2px;
         }
 
-
         .texto-tempo {
             font-size: 17px;
-
             font-weight: bold;
-
             margin-bottom: 7px;
         }
 
-
         .barra-tempo {
             width: 100%;
-
             height: 16px;
 
             background: rgba(255, 255, 255, 0.18);
@@ -315,10 +281,8 @@
             overflow: hidden;
         }
 
-
         .barra-tempo-preenchimento {
             height: 100%;
-
             width: 100%;
 
             background: #ffe05c;
@@ -326,11 +290,9 @@
             border-radius: 20px;
         }
 
-
         .barra-tempo-preenchimento.extra {
             background: #ff6666;
         }
-
 
         .texto-tempo.extra {
             color: #ff9999;
@@ -343,42 +305,31 @@
 
         .botoes-pedido {
             display: flex;
-
             justify-content: center;
-
             gap: 10px;
-
             flex-wrap: wrap;
-
             margin-top: 12px;
         }
 
-
         .botao-pedido {
             width: 55px;
-
             height: 50px;
 
             font-size: 19px;
-
             font-weight: bold;
 
             border: none;
-
             border-radius: 9px;
 
             cursor: pointer;
         }
 
-
         .botao-pedido:hover:not(:disabled) {
             transform: translateY(-3px);
         }
 
-
         .botao-pedido:disabled {
             opacity: 0.3;
-
             cursor: not-allowed;
         }
 
@@ -389,55 +340,38 @@
 
         .area-carta-virada {
             display: flex;
-
             justify-content: center;
-
             margin: 15px auto 25px;
         }
 
-
         .bloco-carta-virada {
             display: flex;
-
             flex-direction: column;
-
             align-items: center;
         }
-
 
         .titulo-carta-virada {
             font-size: 20px;
-
             font-weight: bold;
-
             margin-bottom: 10px;
         }
 
-
         .linha-carta-trunfo {
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             gap: 28px;
         }
 
-
         .carta-virada-destaque {
             width: 110px !important;
-
             height: 160px !important;
-
             font-size: 25px !important;
         }
-
 
         .carta-virada-destaque .simbolo-centro {
             font-size: 54px;
         }
-
 
         .trunfo-destaque {
             background: rgba(0, 0, 0, 0.32);
@@ -453,10 +387,8 @@
             white-space: nowrap;
         }
 
-
         .trunfo-destaque strong {
             font-size: 23px;
-
             color: #ffe05c;
         }
 
@@ -479,13 +411,10 @@
             display: inline-block;
         }
 
-
         .topo-sem-trunfo h2 {
             margin: 0 0 7px;
-
             color: #ffe05c;
         }
-
 
         .topo-sem-trunfo p {
             margin: 0;
@@ -498,40 +427,81 @@
 
         .mesa-central {
             min-height: 280px;
-
             padding: 10px 5px 20px;
         }
-
 
         .titulo-mesa {
             margin: 5px 0 15px;
         }
 
-
         .cartas-mesa {
             display: flex;
-
             justify-content: center;
-
             align-items: flex-start;
-
             gap: 14px;
-
             flex-wrap: wrap;
 
-            min-height: 160px;
+            min-height: 190px;
         }
-
 
         .jogada-mesa {
             text-align: center;
+            position: relative;
         }
-
 
         .nome-jogada {
             margin-bottom: 7px;
-
             font-weight: bold;
+        }
+
+
+        /* ================================================= */
+        /* SETA DA PRIMEIRA CARTA */
+        /* ================================================= */
+
+        .primeira-carta {
+            padding-top: 30px;
+        }
+
+        .seta-primeira-carta {
+            position: absolute;
+
+            top: 0;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            font-size: 30px;
+            font-weight: bold;
+
+            color: white;
+
+            text-shadow:
+                0 2px 5px
+                rgba(0, 0, 0, 0.5);
+
+            animation:
+                setaFlutuando
+                1.1s
+                ease-in-out
+                infinite;
+        }
+
+        @keyframes setaFlutuando {
+
+            0%,
+            100% {
+                transform:
+                    translateX(-50%)
+                    translateY(0);
+            }
+
+            50% {
+                transform:
+                    translateX(-50%)
+                    translateY(5px);
+            }
+
         }
 
 
@@ -541,7 +511,6 @@
 
         .carta {
             width: 95px;
-
             height: 138px;
 
             background: white;
@@ -557,10 +526,8 @@
                 rgba(0, 0, 0, 0.35);
 
             font-weight: bold;
-
             font-size: 22px;
         }
-
 
         button.carta {
             border: none;
@@ -572,40 +539,32 @@
                 opacity 0.15s;
         }
 
-
         button.carta:hover:not(:disabled) {
             transform: translateY(-10px);
         }
 
-
         button.carta:disabled {
             opacity: 0.30;
-
             cursor: not-allowed;
         }
-
 
         .vermelha {
             color: #c5162e;
         }
 
-
         .canto-superior {
             position: absolute;
 
             top: 7px;
-
             left: 9px;
 
             text-align: left;
         }
 
-
         .simbolo-centro {
             position: absolute;
 
             top: 50%;
-
             left: 50%;
 
             transform:
@@ -614,12 +573,10 @@
             font-size: 45px;
         }
 
-
         .canto-inferior {
             position: absolute;
 
             bottom: 7px;
-
             right: 9px;
 
             transform: rotate(180deg);
@@ -640,18 +597,12 @@
             padding-top: 15px;
         }
 
-
         .mao {
             display: flex;
-
             justify-content: center;
-
             align-items: flex-end;
-
             gap: 12px;
-
             flex-wrap: wrap;
-
             margin-top: 15px;
         }
 
@@ -670,18 +621,14 @@
             margin-bottom: 18px;
         }
 
-
         .resultado p {
             margin: 7px;
         }
 
-
         .ranking-final {
             max-width: 520px;
-
             margin: 20px auto;
         }
-
 
         .linha-ranking {
             display: grid;
@@ -702,22 +649,17 @@
                 rgba(255, 255, 255, 0.15);
         }
 
-
         .posicao-ranking {
             font-size: 22px;
-
             font-weight: bold;
         }
-
 
         .vencedor-final {
             color: #ffe05c;
         }
 
-
         .erro {
             color: #ffaaaa;
-
             font-weight: bold;
         }
 
@@ -748,26 +690,19 @@
                 padding-left: 18px;
             }
 
-
             .centro {
                 grid-column: 1 / 3;
-
                 grid-row: 1;
             }
 
-
             .painel-placar {
                 grid-column: 1;
-
                 grid-row: 2;
-
                 transform: none;
             }
 
-
             .painel-status {
                 grid-column: 2;
-
                 grid-row: 2;
             }
 
@@ -784,8 +719,13 @@
 <div class="topo-geral">
 
     <div class="marca-esquerda">
-        <h2>Jogo Elevador Online</h2>
+
+        <h2>
+            Jogo Elevador Online
+        </h2>
+
     </div>
+
 
     <div class="topo-centro">
 
@@ -793,12 +733,17 @@
             Sala {{ codigo }}
         </h1>
 
+
         {% if partida["fase"] != "fim_partida" %}
 
             <h2>
+
                 Mão de
+
                 {{ partida["cartas_por_jogador"] }}
+
                 cartas
+
             </h2>
 
         {% else %}
@@ -811,8 +756,13 @@
 
     </div>
 
+
     <div class="marca-direita">
-        <h2>Caio Campos</h2>
+
+        <h2>
+            © 2026 Caio Campos
+        </h2>
+
     </div>
 
 </div>
@@ -1155,13 +1105,11 @@
 
                     <p>
 
-
                         <strong>
 
                             {{ jogador }}
 
                         </strong>
-
 
                         —
 
@@ -1179,21 +1127,15 @@
 
                         {% if resultado["variacao"] > 0 %}
 
-
                             +{{ resultado["variacao"] }}
-
 
                         {% else %}
 
-
                             {{ resultado["variacao"] }}
-
 
                         {% endif %}
 
-
                         pontos
-
 
                     </p>
 
@@ -1249,13 +1191,10 @@
 
                     <p>
 
-
                         {% for vencedor
                             in partida["resultado_final"]["vencedores"] %}
 
-
                             {{ vencedor }}
-
 
                             {% if not loop.last %}
 
@@ -1263,9 +1202,7 @@
 
                             {% endif %}
 
-
                         {% endfor %}
-
 
                     </p>
 
@@ -1300,7 +1237,6 @@
 
                             <div>
 
-
                                 <strong>
 
                                     {{ jogador["pontos"] }}
@@ -1308,7 +1244,6 @@
                                 </strong>
 
                                 pts
-
 
                             </div>
 
@@ -1483,7 +1418,24 @@
                         {% set carta = jogada["carta"] %}
 
 
-                        <div class="jogada-mesa">
+                        <div
+                            class="
+                                jogada-mesa
+
+                                {% if loop.first %}
+                                    primeira-carta
+                                {% endif %}
+                            "
+                        >
+
+
+                            {% if loop.first %}
+
+                                <div class="seta-primeira-carta">
+                                    ↓
+                                </div>
+
+                            {% endif %}
 
 
                             <div class="nome-jogada">
@@ -2015,6 +1967,7 @@
 
 
     {% endif %}
+
 
 </script>
 
