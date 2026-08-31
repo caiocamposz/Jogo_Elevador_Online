@@ -1,29 +1,176 @@
 <!DOCTYPE html>
-
 <html lang="pt-br">
 
 <head>
 
     <meta charset="UTF-8">
 
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Sala {{ codigo }}</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            padding: 30px 15px;
+
+            font-family: Arial, sans-serif;
+
+            background: #0c5132;
+
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 550px;
+
+            margin: 0 auto;
+
+            background: rgba(0, 0, 0, 0.25);
+
+            border-radius: 14px;
+
+            padding: 25px;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+        }
+
+        ul {
+            padding: 0;
+            margin: 20px 0;
+
+            list-style: none;
+        }
+
+        li {
+            padding: 14px;
+
+            margin-bottom: 8px;
+
+            background: rgba(255, 255, 255, 0.10);
+
+            border-radius: 8px;
+
+            font-size: 17px;
+        }
+
+        #status-sala {
+            text-align: center;
+
+            font-weight: bold;
+
+            color: #ffe05c;
+        }
+
+        button {
+            width: 100%;
+
+            min-height: 50px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #ffe05c;
+
+            color: #222;
+
+            font-size: 17px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            touch-action: manipulation;
+        }
+
+        button:disabled {
+            opacity: 0.35;
+
+            cursor: not-allowed;
+        }
+
+        button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .aguardando-dono {
+            text-align: center;
+
+            opacity: 0.85;
+        }
+
+        .copyright {
+            margin-top: 25px;
+
+            text-align: center;
+
+            font-size: 13px;
+
+            opacity: 0.75;
+        }
+
+        @media (max-width: 600px) {
+
+            body {
+                padding: 15px 10px;
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+        }
+
+    </style>
 
 </head>
 
+
 <body>
 
-    <h1>Sala {{ codigo }}</h1>
 
-    <h2 id="quantidade-jogadores"></h2>
+<div class="container">
 
-    <ul id="lista-jogadores"></ul>
+
+    <h1>
+        Sala {{ codigo }}
+    </h1>
+
+
+    <h2 id="quantidade-jogadores">
+    </h2>
+
+
+    <ul id="lista-jogadores">
+    </ul>
+
 
     <p id="status-sala">
         Aguardando jogadores...
     </p>
 
 
+
     {% if nome == sala["anfitriao"] %}
+
 
         <form
             action="/iniciar-partida/{{ codigo }}"
@@ -35,127 +182,197 @@
                 type="submit"
                 disabled
             >
+
                 Iniciar partida
+
             </button>
 
         </form>
 
+
     {% else %}
 
-        <p>
-            Aguardando o dono da sala iniciar a partida.
+
+        <p class="aguardando-dono">
+
+            Aguardando o dono da sala
+            iniciar a partida.
+
         </p>
+
 
     {% endif %}
 
 
-    <script>
-
-        const codigo = "{{ codigo }}";
-        const meuNome = {{ nome | tojson }};
-
-
-        async function atualizarSala() {
-
-            const resposta =
-                await fetch("/estado-sala/" + codigo);
-
-            const sala =
-                await resposta.json();
+    <div class="copyright">
+        © 2026 Caio Campos
+    </div>
 
 
-            if (sala.iniciado) {
-
-                window.location.href =
-                    "/jogo/" + codigo;
-
-                return;
-            }
+</div>
 
 
-            document.getElementById(
-                "quantidade-jogadores"
-            ).innerText =
-                "Jogadores: "
-                + sala.jogadores.length
-                + " / "
-                + sala.max_jogadores;
+
+<script>
 
 
-            const lista =
-                document.getElementById(
-                    "lista-jogadores"
-                );
-
-            lista.innerHTML = "";
+    const codigo =
+        "{{ codigo }}";
 
 
-            sala.jogadores.forEach(
-                function (jogador) {
+    const meuNome =
+        {{ nome | tojson }};
 
-                    const item =
-                        document.createElement("li");
 
-                    if (jogador === sala.anfitriao) {
 
-                        item.innerText =
-                            jogador + " (dono da sala)";
+    async function atualizarSala() {
 
-                    } else {
 
-                        item.innerText = jogador;
-
-                    }
-
-                    lista.appendChild(item);
-
-                }
+        const resposta =
+            await fetch(
+                "/estado-sala/" + codigo
             );
 
 
-            const status =
-                document.getElementById(
-                    "status-sala"
-                );
+        const sala =
+            await resposta.json();
 
 
-            if (sala.completa) {
 
-                status.innerText =
-                    "Sala completa!";
-
-            } else {
-
-                status.innerText =
-                    "Aguardando jogadores...";
-
-            }
+        if (sala.iniciado) {
 
 
-            const botao =
-                document.getElementById(
-                    "botao-iniciar"
-                );
+            window.location.href =
+                "/jogo/" + codigo;
 
 
-            if (botao) {
-
-                botao.disabled =
-                    !sala.completa;
-
-            }
+            return;
 
         }
 
 
-        atualizarSala();
 
-        setInterval(
-            atualizarSala,
-            1000
+        document.getElementById(
+            "quantidade-jogadores"
+        ).innerText =
+
+            "Jogadores: "
+            + sala.jogadores.length
+            + " / "
+            + sala.max_jogadores;
+
+
+
+        const lista =
+            document.getElementById(
+                "lista-jogadores"
+            );
+
+
+        lista.innerHTML = "";
+
+
+
+        sala.jogadores.forEach(
+
+            function (jogador) {
+
+
+                const item =
+                    document.createElement(
+                        "li"
+                    );
+
+
+                if (
+                    jogador
+                    === sala.anfitriao
+                ) {
+
+
+                    item.innerText =
+                        jogador
+                        + " (dono da sala)";
+
+
+                } else {
+
+
+                    item.innerText =
+                        jogador;
+
+
+                }
+
+
+                lista.appendChild(
+                    item
+                );
+
+
+            }
+
         );
 
-    </script>
+
+
+        const status =
+            document.getElementById(
+                "status-sala"
+            );
+
+
+
+        if (sala.completa) {
+
+
+            status.innerText =
+                "Sala completa!";
+
+
+        } else {
+
+
+            status.innerText =
+                "Aguardando jogadores...";
+
+
+        }
+
+
+
+        const botao =
+            document.getElementById(
+                "botao-iniciar"
+            );
+
+
+
+        if (botao) {
+
+
+            botao.disabled =
+                !sala.completa;
+
+
+        }
+
+
+    }
+
+
+
+    atualizarSala();
+
+
+    setInterval(
+        atualizarSala,
+        1000
+    );
+
+
+</script>
+
 
 </body>
 
