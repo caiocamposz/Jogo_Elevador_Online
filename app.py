@@ -211,24 +211,7 @@ def preparar_mao(sala):
                 carta.to_dict()
             )
 
-    # =====================================================
-    # ORGANIZAÇÃO AUTOMÁTICA DAS MÃOS
-    # =====================================================
-    #
-    # Primeiro organiza por naipe:
-    #
-    # Copas -> Ouros -> Espadas -> Paus
-    #
-    # Depois organiza cada naipe pela força:
-    #
-    # 2 -> 3 -> ... -> 10 -> J -> Q -> K -> A
-    #
-    # A própria lista usada pelo servidor é organizada.
-    # Portanto, os índices das cartas continuam corretos
-    # quando o jogador clica nelas.
-    #
-    # =====================================================
-
+    # Organização automática das mãos.
     for jogador in jogadores:
 
         ordenar_mao(
@@ -387,8 +370,6 @@ def indices_cartas_validas(partida, jogador):
     if not mao:
         return []
 
-    # Se ninguém jogou ainda,
-    # qualquer carta é válida.
     if not partida["mesa_atual"]:
 
         return list(
@@ -410,14 +391,10 @@ def indices_cartas_validas(partida, jogador):
         if carta["naipe"] == naipe_puxado
     ]
 
-    # Se possui o naipe puxado,
-    # é obrigado a seguir.
     if indices_mesmo_naipe:
 
         return indices_mesmo_naipe
 
-    # Caso contrário,
-    # qualquer carta pode ser jogada.
     return list(
         range(
             len(mao)
@@ -441,8 +418,6 @@ def determinar_vencedor_vaza(partida):
 
     candidatos_trunfo = []
 
-    # Se existe trunfo,
-    # procura cartas do trunfo.
     if trunfo is not None:
 
         candidatos_trunfo = [
@@ -457,8 +432,6 @@ def determinar_vencedor_vaza(partida):
             )
         ]
 
-    # Se alguém jogou trunfo,
-    # maior trunfo vence.
     if candidatos_trunfo:
 
         vencedora = max(
@@ -470,8 +443,6 @@ def determinar_vencedor_vaza(partida):
 
         return vencedora["jogador"]
 
-    # Caso contrário,
-    # maior carta do naipe puxado vence.
     candidatos_puxado = [
 
         jogada
@@ -566,8 +537,6 @@ def executar_jogada(
         indice
     )
 
-    # Primeira carta da rodada
-    # define o naipe puxado.
     if not partida["mesa_atual"]:
 
         partida["naipe_puxado"] = (
@@ -581,7 +550,6 @@ def executar_jogada(
         }
     )
 
-    # Todos já jogaram.
     if (
         len(partida["mesa_atual"])
         == len(partida["jogadores"])
@@ -664,8 +632,6 @@ def atualizar_tempo_turno(sala):
         ]
     )
 
-    # Após 15 segundos:
-    # adiciona asterisco.
     if (
         decorrido >= TEMPO_NORMAL
 
@@ -683,8 +649,6 @@ def atualizar_tempo_turno(sala):
             "asterisco_turno_aplicado"
         ] = True
 
-    # Após 20 segundos totais:
-    # carta válida aleatória.
     if decorrido >= TEMPO_TOTAL:
 
         validos = (
@@ -729,7 +693,6 @@ def calcular_resultado_mao(partida):
             "vazas"
         ][jogador]
 
-        # Acertou exatamente.
         if pedido == feitas:
 
             variacao = 5 + pedido
@@ -868,7 +831,6 @@ def atualizar_transicao_vaza(sala):
         >= partida["cartas_por_jogador"]
     )
 
-    # Última rodada da mão.
     if terminou_mao:
 
         calcular_resultado_mao(
@@ -891,8 +853,6 @@ def atualizar_transicao_vaza(sala):
 
         return
 
-    # Próxima rodada começa
-    # com o vencedor da anterior.
     vencedor = partida[
         "vencedor_ultima_vaza"
     ]
@@ -975,8 +935,6 @@ def atualizar_transicao_mao(sala):
 
     partida["indice_mao"] += 1
 
-    # Passa o jogador inicial
-    # uma posição no sentido da mesa.
     partida["jogador_inicial"] = (
         (
             partida["jogador_inicial"]
@@ -1217,7 +1175,7 @@ def criar_sala():
 
 
 # =========================================================
-# ENTRAR NA SALA
+# ENTRAR NA SALA / RECONECTAR
 # =========================================================
 
 @app.route(
@@ -1254,12 +1212,42 @@ def entrar_sala():
 
         sala_atual = salas[codigo]
 
+        # =================================================
+        # RECONECTAR A UMA PARTIDA QUE JÁ COMEÇOU
+        # =================================================
+        #
+        # Se a partida já começou e o nome informado
+        # já pertence à sala, consideramos que o jogador
+        # está voltando para a própria partida.
+        #
+        # Recriamos apenas a sessão do navegador.
+        # A mão, os pontos, as pedidas, as vazas e os
+        # asteriscos já continuam salvos no servidor.
+        #
+        # =================================================
+
         if sala_atual["iniciado"]:
+
+            if nome in sala_atual["jogadores"]:
+
+                session["nome"] = nome
+                session["codigo"] = codigo
+
+                return redirect(
+                    url_for(
+                        "jogo",
+                        codigo=codigo
+                    )
+                )
 
             return (
                 "A partida já começou.",
                 400
             )
+
+        # =================================================
+        # SALA AINDA NÃO COMEÇOU
+        # =================================================
 
         if (
             nome
