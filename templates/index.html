@@ -2,21 +2,163 @@
 <html lang="pt-br">
 
 <head>
+
     <meta charset="UTF-8">
-    <title>Jogo de Cartas</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Jogo Elevador Online</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 15px;
+
+            font-family: Arial, sans-serif;
+
+            background: #0c5132;
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+
+            margin: 0 auto;
+
+            background: rgba(0, 0, 0, 0.25);
+
+            padding: 25px;
+
+            border-radius: 14px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: none;
+
+            border-top:
+                1px solid
+                rgba(255, 255, 255, 0.25);
+
+            margin: 25px 0;
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+
+            min-height: 48px;
+
+            font-size: 16px;
+
+            border-radius: 8px;
+
+            border: none;
+        }
+
+        input,
+        select {
+            padding: 10px;
+        }
+
+        button {
+            margin-top: 15px;
+
+            background: #ffe05c;
+
+            color: #222;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            touch-action: manipulation;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        p {
+            margin-bottom: 7px;
+        }
+
+        .copyright {
+            text-align: center;
+
+            margin-top: 25px;
+
+            font-size: 13px;
+
+            opacity: 0.75;
+        }
+
+        @media (max-width: 600px) {
+
+            body {
+                padding: 15px 10px;
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+
+        }
+
+    </style>
+
 </head>
+
 
 <body>
 
-    <h1>Jogo de Cartas</h1>
+
+<div class="container">
+
+
+    <h1>
+        Jogo Elevador Online
+    </h1>
+
 
     <hr>
 
-    <h2>Criar sala</h2>
 
-    <form action="/criar-sala" method="POST">
+    <h2>
+        Criar sala
+    </h2>
 
-        <p>Seu nome:</p>
+
+    <form
+        action="/criar-sala"
+        method="POST"
+    >
+
+        <p>
+            Seu nome:
+        </p>
 
         <input
             type="text"
@@ -24,18 +166,34 @@
             required
         >
 
-        <p>Quantidade de jogadores:</p>
 
-        <select name="numero_jogadores" required>
+        <p>
+            Quantidade de jogadores:
+        </p>
 
-            <option value="4">4 jogadores</option>
-            <option value="5">5 jogadores</option>
-            <option value="6">6 jogadores</option>
-            <option value="7">7 jogadores</option>
+        <select
+            name="numero_jogadores"
+            required
+        >
+
+            <option value="4">
+                4 jogadores
+            </option>
+
+            <option value="5">
+                5 jogadores
+            </option>
+
+            <option value="6">
+                6 jogadores
+            </option>
+
+            <option value="7">
+                7 jogadores
+            </option>
 
         </select>
 
-        <br><br>
 
         <button type="submit">
             Criar sala
@@ -43,13 +201,23 @@
 
     </form>
 
+
     <hr>
 
-    <h2>Entrar em sala</h2>
 
-    <form action="/entrar-sala" method="POST">
+    <h2>
+        Entrar em sala
+    </h2>
 
-        <p>Seu nome:</p>
+
+    <form
+        action="/entrar-sala"
+        method="POST"
+    >
+
+        <p>
+            Seu nome:
+        </p>
 
         <input
             type="text"
@@ -57,7 +225,10 @@
             required
         >
 
-        <p>Código da sala:</p>
+
+        <p>
+            Código da sala:
+        </p>
 
         <input
             type="text"
@@ -66,13 +237,21 @@
             required
         >
 
-        <br><br>
 
         <button type="submit">
             Entrar na sala
         </button>
 
     </form>
+
+
+    <div class="copyright">
+        © 2026 Caio Campos
+    </div>
+
+
+</div>
+
 
 </body>
 
