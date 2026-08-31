@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-
 <html lang="pt-br">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -12,70 +12,136 @@
 
     <title>Jogo Elevador Online</title>
 
+
     <style>
+
 
         * {
             box-sizing: border-box;
         }
 
+
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
+
         body {
             margin: 0;
+
             font-family: Arial, sans-serif;
+
             background: #0c5132;
+
             color: white;
+
+            overflow-x: hidden;
         }
+
+
+        button {
+            touch-action: manipulation;
+
+            -webkit-tap-highlight-color:
+                transparent;
+        }
+
 
 
         /* ================================================= */
         /* TOPO */
         /* ================================================= */
 
+
         .topo-geral {
+
             display: grid;
-            grid-template-columns: 1fr auto 1fr;
+
+            grid-template-columns:
+                1fr
+                auto
+                1fr;
+
             align-items: start;
-            padding: 14px 24px 6px;
+
+            padding:
+                14px
+                24px
+                6px;
+
             gap: 16px;
+
         }
+
 
         .marca-esquerda {
+
             justify-self: start;
+
             text-align: left;
+
         }
 
+
         .marca-direita {
+
             justify-self: end;
+
             text-align: right;
+
         }
+
 
         .marca-esquerda h2,
         .marca-direita h2 {
+
             margin: 0;
+
             font-size: 23px;
+
             font-weight: bold;
+
             color: white;
+
         }
+
 
         .topo-centro {
+
             text-align: center;
+
         }
+
 
         .topo-centro h1 {
-            margin: 0 0 4px;
+
+            margin:
+                0
+                0
+                4px;
+
             font-size: 28px;
+
         }
 
+
         .topo-centro h2 {
+
             margin: 0;
+
             font-size: 20px;
+
         }
+
 
 
         /* ================================================= */
         /* LAYOUT */
         /* ================================================= */
 
+
         .layout {
+
             display: grid;
 
             grid-template-columns:
@@ -94,34 +160,53 @@
             max-width: 1550px;
 
             margin: auto;
+
         }
+
 
 
         /* ================================================= */
         /* PAINÉIS */
         /* ================================================= */
 
+
         .painel {
-            background: rgba(0, 0, 0, 0.25);
+
+            background:
+                rgba(0, 0, 0, 0.25);
+
             border-radius: 14px;
+
             padding: 16px;
+
             align-self: start;
+
         }
+
 
         .painel h2 {
+
             text-align: center;
+
             margin-top: 0;
+
             margin-bottom: 16px;
+
             font-size: 21px;
+
         }
 
 
+
         /* ================================================= */
-        /* PLACAR ESQUERDO */
+        /* PLACAR */
         /* ================================================= */
 
+
         .painel-placar {
-            transform: translateX(-8px);
+
+            transform:
+                translateX(-8px);
 
             padding:
                 18px
@@ -129,16 +214,26 @@
                 22px;
 
             min-height: 360px;
+
         }
+
 
         .painel-placar h2 {
+
             font-size: 24px;
+
             margin-bottom: 20px;
+
         }
 
+
         .cabecalho-placar {
+
             display: flex;
-            justify-content: space-between;
+
+            justify-content:
+                space-between;
+
             align-items: center;
 
             padding:
@@ -148,373 +243,642 @@
 
             border-bottom:
                 2px solid
-                rgba(255, 255, 255, 0.25);
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.25
+                );
 
             font-size: 14px;
+
             font-weight: bold;
+
             opacity: 0.85;
+
         }
 
+
         .linha-placar {
+
             padding:
                 16px
                 8px;
 
             border-bottom:
                 1px solid
-                rgba(255, 255, 255, 0.15);
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.15
+                );
+
         }
+
 
         .linha-placar:last-child {
+
             border-bottom: none;
+
         }
+
 
         .placar-principal {
+
             display: flex;
-            justify-content: space-between;
+
+            justify-content:
+                space-between;
+
             align-items: center;
+
         }
+
 
         .nome-placar {
+
             font-weight: bold;
+
             font-size: 16px;
+
         }
+
 
         .pontos-placar {
+
             font-size: 24px;
+
             font-weight: bold;
+
         }
+
 
         .asteriscos-placar {
+
             margin-top: 8px;
+
             font-size: 13px;
+
             opacity: 0.8;
+
         }
 
+
         .sou-eu {
+
             color: #ffe05c;
+
         }
+
 
 
         /* ================================================= */
         /* PEDIDAS LATERAIS */
         /* ================================================= */
 
+
         .linha-status {
-            padding: 10px 5px;
+
+            padding:
+                10px
+                5px;
 
             border-bottom:
                 1px solid
-                rgba(255, 255, 255, 0.15);
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.15
+                );
+
         }
+
 
         .linha-status:last-child {
+
             border-bottom: none;
+
         }
+
 
         .nome-status {
+
             font-weight: bold;
+
             margin-bottom: 6px;
+
         }
+
 
         .numeros-status {
+
             display: flex;
-            justify-content: space-between;
+
+            justify-content:
+                space-between;
+
             font-size: 14px;
+
         }
 
+
         .numero-destaque {
+
             font-size: 18px;
+
             font-weight: bold;
+
         }
+
 
 
         /* ================================================= */
         /* CENTRO */
         /* ================================================= */
 
+
         .centro {
+
             min-width: 0;
+
             text-align: center;
+
         }
 
-        .area-jogo {
-            background: rgba(0, 0, 0, 0.25);
 
-            padding: 14px 20px;
+        .area-jogo {
+
+            background:
+                rgba(0, 0, 0, 0.25);
+
+            padding:
+                14px
+                20px;
 
             border-radius: 14px;
 
             margin-bottom: 18px;
+
         }
+
 
         .area-jogo h2,
         .area-jogo h3 {
-            margin: 5px 0 10px;
+
+            margin:
+                5px
+                0
+                10px;
+
         }
 
+
         .nome-destaque-vez {
+
             color: #ffe05c;
+
             font-weight: bold;
+
         }
+
 
 
         /* ================================================= */
         /* TIMER */
         /* ================================================= */
 
+
         .temporizador {
+
             max-width: 430px;
-            margin: 14px auto 2px;
+
+            margin:
+                14px
+                auto
+                2px;
+
         }
+
 
         .texto-tempo {
+
             font-size: 17px;
+
             font-weight: bold;
+
             margin-bottom: 7px;
+
         }
 
+
         .barra-tempo {
+
             width: 100%;
+
             height: 16px;
 
-            background: rgba(255, 255, 255, 0.18);
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.18
+                );
 
             border-radius: 20px;
 
             overflow: hidden;
+
         }
 
+
         .barra-tempo-preenchimento {
+
             height: 100%;
+
             width: 100%;
 
             background: #ffe05c;
 
             border-radius: 20px;
+
         }
+
 
         .barra-tempo-preenchimento.extra {
+
             background: #ff6666;
+
         }
 
+
         .texto-tempo.extra {
+
             color: #ff9999;
+
         }
+
 
 
         /* ================================================= */
         /* PEDIDAS */
         /* ================================================= */
 
+
         .botoes-pedido {
+
             display: flex;
+
             justify-content: center;
+
             gap: 10px;
+
             flex-wrap: wrap;
+
             margin-top: 12px;
+
         }
 
+
         .botao-pedido {
+
             width: 55px;
+
             height: 50px;
 
             font-size: 19px;
+
             font-weight: bold;
 
             border: none;
+
             border-radius: 9px;
 
             cursor: pointer;
+
         }
+
 
         .botao-pedido:hover:not(:disabled) {
-            transform: translateY(-3px);
+
+            transform:
+                translateY(-3px);
+
         }
 
+
         .botao-pedido:disabled {
+
             opacity: 0.3;
+
             cursor: not-allowed;
+
         }
+
 
 
         /* ================================================= */
         /* CARTA VIRADA */
         /* ================================================= */
 
+
         .area-carta-virada {
+
             display: flex;
+
             justify-content: center;
-            margin: 15px auto 25px;
+
+            margin:
+                15px
+                auto
+                25px;
+
         }
+
 
         .bloco-carta-virada {
+
             display: flex;
+
             flex-direction: column;
+
             align-items: center;
+
         }
+
 
         .titulo-carta-virada {
+
             font-size: 20px;
+
             font-weight: bold;
+
             margin-bottom: 10px;
+
         }
+
 
         .linha-carta-trunfo {
+
             display: flex;
+
             align-items: center;
+
             justify-content: center;
+
             gap: 28px;
+
         }
+
 
         .carta-virada-destaque {
+
             width: 110px !important;
+
             height: 160px !important;
+
             font-size: 25px !important;
+
         }
 
-        .carta-virada-destaque .simbolo-centro {
+
+        .carta-virada-destaque
+        .simbolo-centro {
+
             font-size: 54px;
+
         }
+
 
         .trunfo-destaque {
-            background: rgba(0, 0, 0, 0.32);
 
-            border: 2px solid #ffe05c;
+            background:
+                rgba(0, 0, 0, 0.32);
+
+            border:
+                2px solid
+                #ffe05c;
 
             border-radius: 12px;
 
-            padding: 15px 20px;
+            padding:
+                15px
+                20px;
 
             font-size: 19px;
 
             white-space: nowrap;
+
         }
 
+
         .trunfo-destaque strong {
+
             font-size: 23px;
+
             color: #ffe05c;
+
         }
+
 
 
         /* ================================================= */
         /* TOPO SEM TRUNFO */
         /* ================================================= */
 
-        .topo-sem-trunfo {
-            background: rgba(0, 0, 0, 0.32);
 
-            border: 2px solid #ffe05c;
+        .topo-sem-trunfo {
+
+            background:
+                rgba(0, 0, 0, 0.32);
+
+            border:
+                2px solid
+                #ffe05c;
 
             border-radius: 14px;
 
-            padding: 18px 30px;
+            padding:
+                18px
+                30px;
 
-            margin: 15px auto 25px;
+            margin:
+                15px
+                auto
+                25px;
 
             display: inline-block;
+
         }
+
 
         .topo-sem-trunfo h2 {
-            margin: 0 0 7px;
+
+            margin:
+                0
+                0
+                7px;
+
             color: #ffe05c;
+
         }
 
+
         .topo-sem-trunfo p {
+
             margin: 0;
+
         }
+
 
 
         /* ================================================= */
         /* MESA */
         /* ================================================= */
 
+
         .mesa-central {
+
             min-height: 280px;
-            padding: 10px 5px 20px;
+
+            padding:
+                10px
+                5px
+                20px;
+
         }
+
 
         .titulo-mesa {
-            margin: 5px 0 15px;
+
+            margin:
+                5px
+                0
+                15px;
+
         }
 
+
         .cartas-mesa {
+
             display: flex;
+
             justify-content: center;
+
             align-items: flex-start;
+
             gap: 14px;
+
             flex-wrap: wrap;
 
             min-height: 190px;
+
         }
+
 
         .jogada-mesa {
+
             text-align: center;
+
             position: relative;
+
         }
+
 
         .nome-jogada {
+
             margin-bottom: 7px;
+
             font-weight: bold;
+
         }
 
 
+
         /* ================================================= */
-        /* SETA DA PRIMEIRA CARTA */
+        /* SETA PRIMEIRA CARTA */
         /* ================================================= */
+
 
         .primeira-carta {
+
             padding-top: 30px;
+
         }
 
+
         .seta-primeira-carta {
+
             position: absolute;
 
             top: 0;
+
             left: 50%;
 
-            transform: translateX(-50%);
+            transform:
+                translateX(-50%);
 
             font-size: 30px;
+
             font-weight: bold;
 
             color: white;
 
             text-shadow:
-                0 2px 5px
-                rgba(0, 0, 0, 0.5);
+                0
+                2px
+                5px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.5
+                );
 
             animation:
                 setaFlutuando
                 1.1s
                 ease-in-out
                 infinite;
+
         }
+
 
         @keyframes setaFlutuando {
 
             0%,
             100% {
+
                 transform:
                     translateX(-50%)
                     translateY(0);
+
             }
 
+
             50% {
+
                 transform:
                     translateX(-50%)
                     translateY(5px);
+
             }
 
         }
+
 
 
         /* ================================================= */
         /* CARTAS */
         /* ================================================= */
 
+
         .carta {
+
             width: 95px;
+
             height: 138px;
 
             background: white;
@@ -526,14 +890,25 @@
             position: relative;
 
             box-shadow:
-                0 4px 9px
-                rgba(0, 0, 0, 0.35);
+                0
+                4px
+                9px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.35
+                );
 
             font-weight: bold;
+
             font-size: 22px;
+
         }
 
+
         button.carta {
+
             border: none;
 
             cursor: pointer;
@@ -541,100 +916,167 @@
             transition:
                 transform 0.15s,
                 opacity 0.15s;
+
         }
+
 
         button.carta:hover:not(:disabled) {
-            transform: translateY(-10px);
+
+            transform:
+                translateY(-10px);
+
         }
+
 
         button.carta:disabled {
+
             opacity: 0.30;
+
             cursor: not-allowed;
+
         }
+
 
         .vermelha {
+
             color: #c5162e;
+
         }
 
+
         .canto-superior {
+
             position: absolute;
 
             top: 7px;
+
             left: 9px;
 
             text-align: left;
+
         }
 
+
         .simbolo-centro {
+
             position: absolute;
 
             top: 50%;
+
             left: 50%;
 
             transform:
                 translate(-50%, -50%);
 
             font-size: 45px;
+
         }
 
+
         .canto-inferior {
+
             position: absolute;
 
             bottom: 7px;
+
             right: 9px;
 
-            transform: rotate(180deg);
+            transform:
+                rotate(180deg);
 
             text-align: left;
+
         }
+
 
 
         /* ================================================= */
         /* MÃO */
         /* ================================================= */
 
+
         .area-mao {
+
             border-top:
                 1px solid
-                rgba(255, 255, 255, 0.5);
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.5
+                );
 
             padding-top: 15px;
+
         }
 
+
         .mao {
+
             display: flex;
+
             justify-content: center;
+
             align-items: flex-end;
+
             gap: 12px;
+
             flex-wrap: wrap;
+
             margin-top: 15px;
+
         }
+
+
+        .mao form {
+
+            margin: 0;
+
+            padding: 0;
+
+        }
+
 
 
         /* ================================================= */
         /* RESULTADOS */
         /* ================================================= */
 
+
         .resultado {
-            background: rgba(0, 0, 0, 0.32);
+
+            background:
+                rgba(0, 0, 0, 0.32);
 
             padding: 18px;
 
             border-radius: 14px;
 
             margin-bottom: 18px;
+
         }
+
 
         .resultado p {
+
             margin: 7px;
+
         }
+
 
         .ranking-final {
+
             max-width: 520px;
-            margin: 20px auto;
+
+            margin:
+                20px
+                auto;
+
         }
 
+
         .linha-ranking {
+
             display: grid;
 
             grid-template-columns:
@@ -650,67 +1092,624 @@
 
             border-bottom:
                 1px solid
-                rgba(255, 255, 255, 0.15);
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.15
+                );
+
         }
+
 
         .posicao-ranking {
+
             font-size: 22px;
+
             font-weight: bold;
+
         }
+
 
         .vencedor-final {
+
             color: #ffe05c;
+
         }
+
 
         .erro {
+
             color: #ffaaaa;
+
             font-weight: bold;
+
         }
 
 
+
         /* ================================================= */
-        /* RESPONSIVO */
+        /* TABLETS */
         /* ================================================= */
+
 
         @media (max-width: 950px) {
 
+
             .topo-geral {
+
                 grid-template-columns: 1fr;
+
                 text-align: center;
+
             }
+
 
             .marca-esquerda,
             .marca-direita,
             .topo-centro {
+
                 justify-self: center;
+
                 text-align: center;
+
             }
 
+
             .layout {
+
                 grid-template-columns:
                     1fr
                     1fr;
 
-                padding-left: 18px;
+                padding:
+                    10px
+                    14px
+                    30px;
+
             }
+
 
             .centro {
-                grid-column: 1 / 3;
+
+                grid-column:
+                    1 / 3;
+
                 grid-row: 1;
+
             }
+
 
             .painel-placar {
+
                 grid-column: 1;
+
                 grid-row: 2;
+
                 transform: none;
+
             }
 
+
             .painel-status {
+
                 grid-column: 2;
+
                 grid-row: 2;
+
             }
 
         }
+
+
+
+        /* ================================================= */
+        /* CELULAR */
+        /* ================================================= */
+
+
+        @media (max-width: 600px) {
+
+
+            .topo-geral {
+
+                display: flex;
+
+                flex-direction: column;
+
+                align-items: center;
+
+                gap: 5px;
+
+                padding:
+                    10px
+                    8px;
+
+            }
+
+
+            .marca-esquerda {
+
+                order: 1;
+
+            }
+
+
+            .topo-centro {
+
+                order: 2;
+
+            }
+
+
+            .marca-direita {
+
+                order: 3;
+
+            }
+
+
+            .marca-esquerda h2 {
+
+                font-size: 19px;
+
+            }
+
+
+            .marca-direita h2 {
+
+                font-size: 13px;
+
+                opacity: 0.8;
+
+            }
+
+
+            .topo-centro h1 {
+
+                font-size: 23px;
+
+            }
+
+
+            .topo-centro h2 {
+
+                font-size: 16px;
+
+            }
+
+
+
+            .layout {
+
+                display: flex;
+
+                flex-direction: column;
+
+                width: 100%;
+
+                padding:
+                    5px
+                    8px
+                    25px;
+
+                gap: 12px;
+
+            }
+
+
+            .centro {
+
+                order: 1;
+
+                width: 100%;
+
+            }
+
+
+            .painel-placar {
+
+                order: 2;
+
+                width: 100%;
+
+                min-height: 0;
+
+                transform: none;
+
+            }
+
+
+            .painel-status {
+
+                order: 3;
+
+                width: 100%;
+
+            }
+
+
+
+            .area-jogo {
+
+                padding:
+                    12px
+                    10px;
+
+                margin-bottom: 10px;
+
+            }
+
+
+            .area-jogo h2 {
+
+                font-size: 20px;
+
+            }
+
+
+            .area-jogo h3 {
+
+                font-size: 18px;
+
+            }
+
+
+
+            .temporizador {
+
+                width: 100%;
+
+                margin-top: 10px;
+
+            }
+
+
+
+            .botoes-pedido {
+
+                gap: 8px;
+
+            }
+
+
+            .botao-pedido {
+
+                width: 52px;
+
+                height: 48px;
+
+                font-size: 18px;
+
+            }
+
+
+
+            .linha-carta-trunfo {
+
+                gap: 14px;
+
+            }
+
+
+            .carta-virada-destaque {
+
+                width:
+                    85px
+                    !important;
+
+                height:
+                    123px
+                    !important;
+
+                font-size:
+                    20px
+                    !important;
+
+            }
+
+
+            .carta-virada-destaque
+            .simbolo-centro {
+
+                font-size: 40px;
+
+            }
+
+
+            .trunfo-destaque {
+
+                padding:
+                    12px
+                    13px;
+
+                font-size: 15px;
+
+            }
+
+
+            .trunfo-destaque strong {
+
+                font-size: 18px;
+
+            }
+
+
+
+            .mesa-central {
+
+                min-height: 210px;
+
+                padding:
+                    5px
+                    0
+                    12px;
+
+            }
+
+
+            .cartas-mesa {
+
+                gap: 7px;
+
+                min-height: 150px;
+
+            }
+
+
+            .nome-jogada {
+
+                max-width: 76px;
+
+                overflow: hidden;
+
+                text-overflow: ellipsis;
+
+                white-space: nowrap;
+
+                font-size: 12px;
+
+            }
+
+
+
+            .carta {
+
+                width: 76px;
+
+                height: 110px;
+
+                font-size: 17px;
+
+                border-radius: 8px;
+
+            }
+
+
+            .simbolo-centro {
+
+                font-size: 34px;
+
+            }
+
+
+            .canto-superior {
+
+                top: 5px;
+
+                left: 7px;
+
+            }
+
+
+            .canto-inferior {
+
+                bottom: 5px;
+
+                right: 7px;
+
+            }
+
+
+
+            .area-mao {
+
+                padding-top: 10px;
+
+            }
+
+
+            .area-mao h2 {
+
+                font-size: 19px;
+
+            }
+
+
+            .mao {
+
+                gap: 6px;
+
+                margin-top: 10px;
+
+            }
+
+
+
+            button.carta:hover:not(:disabled) {
+
+                transform: none;
+
+            }
+
+
+            button.carta:active:not(:disabled) {
+
+                transform:
+                    translateY(-5px);
+
+            }
+
+
+
+            .primeira-carta {
+
+                padding-top: 25px;
+
+            }
+
+
+            .seta-primeira-carta {
+
+                font-size: 25px;
+
+            }
+
+
+
+            .painel {
+
+                border-radius: 12px;
+
+                padding: 14px;
+
+            }
+
+
+            .painel-placar h2 {
+
+                font-size: 21px;
+
+                margin-bottom: 12px;
+
+            }
+
+
+            .linha-placar {
+
+                padding:
+                    11px
+                    6px;
+
+            }
+
+
+            .pontos-placar {
+
+                font-size: 21px;
+
+            }
+
+
+
+            .linha-status {
+
+                padding:
+                    9px
+                    4px;
+
+            }
+
+
+
+            .topo-sem-trunfo {
+
+                padding:
+                    14px
+                    20px;
+
+                margin:
+                    10px
+                    auto
+                    15px;
+
+            }
+
+
+
+            .resultado {
+
+                padding: 12px;
+
+            }
+
+
+            .linha-ranking {
+
+                grid-template-columns:
+                    35px
+                    1fr
+                    75px;
+
+                padding:
+                    10px
+                    5px;
+
+                gap: 5px;
+
+            }
+
+        }
+
+
+
+        /* ================================================= */
+        /* CELULARES MUITO ESTREITOS */
+        /* ================================================= */
+
+
+        @media (max-width: 380px) {
+
+
+            .carta {
+
+                width: 68px;
+
+                height: 100px;
+
+                font-size: 16px;
+
+            }
+
+
+            .simbolo-centro {
+
+                font-size: 30px;
+
+            }
+
+
+            .mao {
+
+                gap: 5px;
+
+            }
+
+
+            .cartas-mesa {
+
+                gap: 5px;
+
+            }
+
+
+            .linha-carta-trunfo {
+
+                gap: 8px;
+
+            }
+
+
+            .trunfo-destaque {
+
+                padding:
+                    10px
+                    9px;
+
+            }
+
+        }
+
 
     </style>
 
@@ -720,7 +1719,9 @@
 <body>
 
 
+
 <div class="topo-geral">
+
 
     <div class="marca-esquerda">
 
@@ -731,7 +1732,9 @@
     </div>
 
 
+
     <div class="topo-centro">
+
 
         <h1>
             Sala {{ codigo }}
@@ -739,6 +1742,7 @@
 
 
         {% if partida["fase"] != "fim_partida" %}
+
 
             <h2>
 
@@ -750,15 +1754,20 @@
 
             </h2>
 
+
         {% else %}
+
 
             <h2>
                 Partida encerrada
             </h2>
 
+
         {% endif %}
 
+
     </div>
+
 
 
     <div class="marca-direita">
@@ -769,6 +1778,7 @@
 
     </div>
 
+
 </div>
 
 
@@ -776,11 +1786,14 @@
 <div class="layout">
 
 
+
     <!-- ================================================= -->
     <!-- PLACAR -->
     <!-- ================================================= -->
 
+
     <aside class="painel painel-placar">
+
 
         <h2>
             Placar
@@ -789,22 +1802,29 @@
 
         <div class="cabecalho-placar">
 
+
             <span>
                 Nomes
             </span>
+
 
             <span>
                 Pontos
             </span>
 
+
         </div>
+
 
 
         {% for jogador in sala["jogadores"] %}
 
+
             <div class="linha-placar">
 
+
                 <div class="placar-principal">
+
 
                     <span
                         class="
@@ -827,6 +1847,7 @@
 
                     </span>
 
+
                 </div>
 
 
@@ -840,9 +1861,12 @@
 
                 </div>
 
+
             </div>
 
+
         {% endfor %}
+
 
     </aside>
 
@@ -852,7 +1876,9 @@
     <!-- CENTRO -->
     <!-- ================================================= -->
 
+
     <main class="centro">
+
 
 
         {% if partida["fase"] == "pedidas" %}
@@ -864,6 +1890,7 @@
                 <h2>
                     Pedidas
                 </h2>
+
 
 
                 {% if jogador_da_vez_pedido == nome %}
@@ -879,13 +1906,17 @@
                     </p>
 
 
+
                     {% if erro_pedido %}
+
 
                         <p class="erro">
                             {{ erro_pedido }}
                         </p>
 
+
                     {% endif %}
+
 
 
                     <form
@@ -903,6 +1934,7 @@
 
 
                                 <button
+
                                     class="botao-pedido"
 
                                     type="submit"
@@ -914,6 +1946,7 @@
                                     {% if numero == pedido_proibido %}
                                         disabled
                                     {% endif %}
+
                                 >
 
                                     {{ numero }}
@@ -928,6 +1961,7 @@
 
 
                     </form>
+
 
 
                 {% else %}
@@ -977,6 +2011,7 @@
                 </h2>
 
 
+
                 {% if partida["naipe_puxado"] %}
 
 
@@ -994,6 +2029,7 @@
 
 
                 {% endif %}
+
 
 
                 {% if jogador_da_vez_jogada == nome %}
@@ -1023,6 +2059,7 @@
                 {% endif %}
 
 
+
                 {% if erro_jogada %}
 
 
@@ -1034,6 +2071,7 @@
 
 
                 {% endif %}
+
 
 
                 <div class="temporizador">
@@ -1103,17 +2141,18 @@
                 </h2>
 
 
+
                 {% for jogador, resultado
                     in partida["resultado_mao"].items() %}
 
 
                     <p>
 
+
                         <strong>
-
                             {{ jogador }}
-
                         </strong>
+
 
                         —
 
@@ -1129,22 +2168,30 @@
 
                         |
 
+
                         {% if resultado["variacao"] > 0 %}
+
 
                             +{{ resultado["variacao"] }}
 
+
                         {% else %}
+
 
                             {{ resultado["variacao"] }}
 
+
                         {% endif %}
 
+
                         pontos
+
 
                     </p>
 
 
                 {% endfor %}
+
 
 
                 <p>
@@ -1166,6 +2213,7 @@
             <div class="resultado">
 
 
+
                 {% if
                     partida["resultado_final"]["vencedores"]|length
                     == 1
@@ -1183,6 +2231,7 @@
                     </h1>
 
 
+
                 {% else %}
 
 
@@ -1195,10 +2244,13 @@
 
                     <p>
 
+
                         {% for vencedor
                             in partida["resultado_final"]["vencedores"] %}
 
+
                             {{ vencedor }}
+
 
                             {% if not loop.last %}
 
@@ -1206,7 +2258,9 @@
 
                             {% endif %}
 
+
                         {% endfor %}
+
 
                     </p>
 
@@ -1272,7 +2326,9 @@
         <!-- TRUNFO -->
         <!-- ================================================= -->
 
+
         {% if partida["fase"] != "fim_partida" %}
+
 
 
             {% if partida["trunfo"] is none %}
@@ -1294,10 +2350,13 @@
                 </div>
 
 
+
             {% else %}
 
 
+
                 {% set virada = partida["carta_virada"] %}
+
 
 
                 <div class="area-carta-virada">
@@ -1313,7 +2372,9 @@
                         </div>
 
 
+
                         <div class="linha-carta-trunfo">
+
 
 
                             <div
@@ -1334,11 +2395,13 @@
 
                                 <div class="canto-superior">
 
+
                                     {{ virada["valor"] }}
 
                                     <br>
 
                                     {{ virada["simbolo"] }}
+
 
                                 </div>
 
@@ -1352,11 +2415,13 @@
 
                                 <div class="canto-inferior">
 
+
                                     {{ virada["valor"] }}
 
                                     <br>
 
                                     {{ virada["simbolo"] }}
+
 
                                 </div>
 
@@ -1401,6 +2466,7 @@
         <!-- MESA -->
         <!-- ================================================= -->
 
+
         {% if partida["fase"] != "fim_partida" %}
 
 
@@ -1415,11 +2481,14 @@
                 <div class="cartas-mesa">
 
 
+
                     {% for jogada
                         in partida["mesa_atual"] %}
 
 
+
                         {% set carta = jogada["carta"] %}
+
 
 
                         <div
@@ -1433,13 +2502,19 @@
                         >
 
 
+
                             {% if loop.first %}
 
+
                                 <div class="seta-primeira-carta">
+
                                     ↓
+
                                 </div>
 
+
                             {% endif %}
+
 
 
                             <div class="nome-jogada">
@@ -1447,6 +2522,7 @@
                                 {{ jogada["jogador"] }}
 
                             </div>
+
 
 
                             <div
@@ -1466,11 +2542,13 @@
 
                                 <div class="canto-superior">
 
+
                                     {{ carta["valor"] }}
 
                                     <br>
 
                                     {{ carta["simbolo"] }}
+
 
                                 </div>
 
@@ -1484,11 +2562,13 @@
 
                                 <div class="canto-inferior">
 
+
                                     {{ carta["valor"] }}
 
                                     <br>
 
                                     {{ carta["simbolo"] }}
+
 
                                 </div>
 
@@ -1513,6 +2593,7 @@
             <!-- SUA MÃO -->
             <!-- ================================================= -->
 
+
             <section class="area-mao">
 
 
@@ -1526,10 +2607,13 @@
                 <div class="mao">
 
 
+
                     {% for carta in minha_mao %}
 
 
+
                         {% set indice = loop.index0 %}
+
 
 
                         <form
@@ -1539,15 +2623,19 @@
 
 
                             <input
+
                                 type="hidden"
 
                                 name="indice_carta"
 
                                 value="{{ indice }}"
+
                             >
 
 
+
                             <button
+
                                 type="submit"
 
                                 class="
@@ -1562,6 +2650,7 @@
                                     {% endif %}
                                 "
 
+
                                 {% if
                                     partida["fase"] != "jogando"
                                     or
@@ -1573,16 +2662,19 @@
                                     disabled
 
                                 {% endif %}
+
                             >
 
 
                                 <div class="canto-superior">
+
 
                                     {{ carta["valor"] }}
 
                                     <br>
 
                                     {{ carta["simbolo"] }}
+
 
                                 </div>
 
@@ -1596,11 +2688,13 @@
 
                                 <div class="canto-inferior">
 
+
                                     {{ carta["valor"] }}
 
                                     <br>
 
                                     {{ carta["simbolo"] }}
+
 
                                 </div>
 
@@ -1631,12 +2725,14 @@
     <!-- PEDIDAS / FEITAS -->
     <!-- ================================================= -->
 
+
     <aside class="painel painel-status">
 
 
         <h2>
             Pedidas
         </h2>
+
 
 
         {% for jogador in sala["jogadores"] %}
@@ -1660,45 +2756,57 @@
                 </div>
 
 
+
                 <div class="numeros-status">
 
 
                     <div>
 
+
                         Pedido
 
                         <br>
+
 
                         <span class="numero-destaque">
 
 
                             {% if jogador in partida["pedidas"] %}
 
+
                                 {{ partida["pedidas"][jogador] }}
+
 
                             {% else %}
 
+
                                 -
+
 
                             {% endif %}
 
 
                         </span>
 
+
                     </div>
+
 
 
                     <div>
 
+
                         Fez
 
                         <br>
+
 
                         <span class="numero-destaque">
 
                             {{ partida["vazas"][jogador] }}
 
                         </span>
+
 
                     </div>
 
@@ -1723,6 +2831,7 @@
 <!-- JAVASCRIPT -->
 <!-- ================================================= -->
 
+
 <script>
 
 
@@ -1742,31 +2851,40 @@
 
 
         if (recarregando) {
+
             return;
+
         }
 
 
         try {
 
 
-            const resposta = await fetch(
+            const resposta =
+                await fetch(
 
-                "/estado-jogo/" + codigoSala,
+                    "/estado-jogo/"
+                    + codigoSala,
 
-                {
-                    cache: "no-store"
-                }
+                    {
+                        cache: "no-store"
+                    }
 
-            );
+                );
+
 
 
             if (!resposta.ok) {
+
                 return;
+
             }
+
 
 
             const dados =
                 await resposta.json();
+
 
 
             const atual =
@@ -1779,6 +2897,7 @@
                 JSON.stringify(
                     assinaturaInicial
                 );
+
 
 
             if (atual !== inicial) {
@@ -1811,6 +2930,7 @@
     }
 
 
+
     setInterval(
         verificarEstado,
         500
@@ -1824,10 +2944,14 @@
     %}
 
 
+
         const tempoInicial =
             Number(
+
                 {{ tempo_total_restante | tojson }}
+
             );
+
 
 
         const momentoInicial =
@@ -1838,6 +2962,7 @@
         function atualizarRelogio() {
 
 
+
             const passou =
                 (
                     performance.now()
@@ -1846,11 +2971,16 @@
                 / 1000;
 
 
+
             const restanteTotal =
                 Math.max(
+
                     0,
+
                     tempoInicial - passou
+
                 );
+
 
 
             const texto =
@@ -1865,8 +2995,11 @@
                 );
 
 
+
             if (!texto || !barra) {
+
                 return;
+
             }
 
 
@@ -1874,8 +3007,10 @@
             if (restanteTotal > 5) {
 
 
+
                 const restanteNormal =
                     restanteTotal - 5;
+
 
 
                 texto.innerText =
@@ -1884,6 +3019,7 @@
                         restanteNormal
                     )
                     + "s";
+
 
 
                 texto.classList.remove(
@@ -1896,6 +3032,7 @@
                 );
 
 
+
                 const porcentagem =
                     (
                         restanteNormal
@@ -1904,18 +3041,24 @@
                     * 100;
 
 
+
                 barra.style.width =
                     Math.max(
+
                         0,
+
                         Math.min(
                             100,
                             porcentagem
                         )
+
                     )
                     + "%";
 
 
+
             } else {
+
 
 
                 texto.innerText =
@@ -1924,6 +3067,7 @@
                         restanteTotal
                     )
                     + "s";
+
 
 
                 texto.classList.add(
@@ -1936,6 +3080,7 @@
                 );
 
 
+
                 const porcentagem =
                     (
                         restanteTotal
@@ -1944,13 +3089,17 @@
                     * 100;
 
 
+
                 barra.style.width =
                     Math.max(
+
                         0,
+
                         Math.min(
                             100,
                             porcentagem
                         )
+
                     )
                     + "%";
 
@@ -1961,7 +3110,9 @@
         }
 
 
+
         atualizarRelogio();
+
 
 
         setInterval(
